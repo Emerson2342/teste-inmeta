@@ -33,3 +33,10 @@ export interface NewOrderType {
   description: string;
   assignedTo: string;
 }
+export interface UpdateOrderProps {
+  _id: string;
+  title: string;
+  description: string;
+  status: "Pending" | "In Progress" | "Completed";
+  assignedTo: string;
+}

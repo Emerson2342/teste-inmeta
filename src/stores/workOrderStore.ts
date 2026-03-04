@@ -1,15 +1,16 @@
-import { NewOrderType, WorkOrder } from "@src/props/types";
+import { NewOrderType, UpdateOrderProps, WorkOrder } from "@src/props/types";
 import uuid from "react-native-uuid";
+import { UpdateMode } from "realm";
 import { create } from "zustand";
 import { realm } from "../database/realm";
 
 type WorkOrderState = {
   workOrders: WorkOrder[];
-
   loadFromRealm: () => void;
   addWorkOrder: (data: AddWorkOrderData) => void;
-  updateWorkOrder: (order: WorkOrder) => void;
+  updateWorkOrder: (order: UpdateOrderProps) => void;
   deleteWorkOrder: (id: string) => void;
+  getOrder: (id: string) => WorkOrder | null;
 };
 
 type AddWorkOrderData = Pick<WorkOrder, keyof NewOrderType>;
@@ -45,14 +46,14 @@ export const useWorkOrderStore = create<WorkOrderState>((set) => ({
     }));
   },
 
-  updateWorkOrder: (updatedOrder) => {
+  updateWorkOrder: (updatedOrder: Partial<WorkOrder> & { _id: string }) => {
     realm.write(() => {
-      realm.create("WorkOrder", updatedOrder, Realm.UpdateMode.Modified);
+      realm.create("WorkOrder", updatedOrder, UpdateMode.Modified);
     });
 
     set((state) => ({
       workOrders: state.workOrders.map((order) =>
-        order._id === updatedOrder._id ? updatedOrder : order,
+        order._id === updatedOrder._id ? { ...order, ...updatedOrder } : order,
       ),
     }));
   },
@@ -71,5 +72,26 @@ export const useWorkOrderStore = create<WorkOrderState>((set) => ({
     set((state) => ({
       workOrders: state.workOrders.filter((order) => order._id !== id),
     }));
+  },
+  getOrder: (id: string): WorkOrder | null => {
+    try {
+      const order = realm.objectForPrimaryKey<WorkOrder>("WorkOrder", id);
+      if (!order) return null;
+
+      return {
+        _id: order._id,
+        title: order.title,
+        description: order.description,
+        status: order.status,
+        deleted: order.deleted,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        assignedTo: order.assignedTo,
+        completed: false,
+      };
+    } catch (err) {
+      console.error("Erro ao buscar Order:", err);
+      return null;
+    }
   },
 }));

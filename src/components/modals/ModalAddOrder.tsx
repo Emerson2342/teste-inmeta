@@ -58,7 +58,13 @@ export function ModalAddOrder({ onClose }: ModalAddProps) {
           }
         />
       </View>
-      <View style={{ flexDirection: "row", gap: 15, marginTop: 15 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 15,
+          marginTop: 15,
+        }}
+      >
         <View style={{ flex: 0.5 }}>
           <ButtonComponent
             isCancelButton={true}

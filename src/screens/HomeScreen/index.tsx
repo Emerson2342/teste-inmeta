@@ -1,13 +1,12 @@
 import { AntDesign } from "@expo/vector-icons";
 import { ButtonComponent } from "@src/components/ButtonComponent";
+import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
 import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
 import { TextComponent } from "@src/components/TextComponent";
-import { Assets } from "@src/config/assets";
 import { Palette } from "@src/theme/colors";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, View } from "react-native";
-import { SvgUri } from "react-native-svg";
 import { ServiceOrderesComponent } from "./serviceOrderes";
 
 const companyServices: string[] = [
@@ -48,15 +47,7 @@ export function HomeScreen() {
   };
   return (
     <View style={{ flex: 1 }}>
-      <View
-        style={{
-          alignItems: "center",
-          flex: 0.1,
-          justifyContent: "center",
-        }}
-      >
-        <SvgUri width="250" uri={Assets.LOGO_URL} />
-      </View>
+      <LogoComponent />
       <View>
         {companyServices.map((item, index) => {
           const translateX = animations[index].interpolate({
@@ -87,7 +78,7 @@ export function HomeScreen() {
       <View style={{ flex: 0.5, marginHorizontal: 15 }}>
         <ServiceOrderesComponent key={key} />
       </View>
-      <View>
+      <View style={{ alignItems: "center" }}>
         <ButtonComponent
           label="Adicionar Ordem"
           onclick={() => setAddOrderModalVisible(true)}

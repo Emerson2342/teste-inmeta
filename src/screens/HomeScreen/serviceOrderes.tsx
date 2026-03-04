@@ -4,6 +4,7 @@ import { TextComponent } from "@src/components/TextComponent";
 import { WorkOrder } from "@src/props/types";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -11,16 +12,28 @@ export function ServiceOrderesComponent() {
   const [loadingData, setLoadingData] = useState(true);
   const { workOrders, loadFromRealm } = useWorkOrderStore();
 
+  const router = useRouter();
+
   useEffect(() => {
     loadFromRealm();
     setLoadingData(false);
   }, []);
+
+  const filteredOrders = workOrders.filter((o) => o.deleted === false);
 
   const renderItem = ({ item, index }: { item: WorkOrder; index: number }) => {
     const isOdd = index % 2 === 0;
 
     return (
       <TouchableOpacity
+        onPress={() =>
+          router.push({
+            pathname: "/order-details",
+            params: {
+              id: item._id,
+            },
+          })
+        }
         style={{
           flexDirection: "row",
           backgroundColor: isOdd ? Palette.Theme1.light : undefined,
@@ -56,7 +69,7 @@ export function ServiceOrderesComponent() {
       </TextComponent>
       {loadingData ? (
         <ActivityIndicatorComponent />
-      ) : workOrders.length > 0 ? (
+      ) : filteredOrders.length > 0 ? (
         <View>
           <View style={{ flexDirection: "row" }}>
             <TextComponent
@@ -74,7 +87,7 @@ export function ServiceOrderesComponent() {
           </View>
           <FlatList
             keyExtractor={(item) => item._id}
-            data={workOrders}
+            data={filteredOrders}
             renderItem={renderItem}
           />
         </View>

@@ -2,12 +2,11 @@ import React from "react";
 import { Modal, StyleSheet, View } from "react-native";
 
 type ModalProps = {
-  onClick: () => void;
   visible: boolean;
   child: React.ReactNode;
 };
 
-export function ModalBaseComponent({ child, onClick, visible }: ModalProps) {
+export function ModalBaseComponent({ child, visible }: ModalProps) {
   return (
     <Modal transparent={true} visible={visible}>
       <View style={styles.container}>

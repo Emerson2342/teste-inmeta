@@ -9,12 +9,19 @@ import {
 } from "react-native";
 import { TextComponent } from "./TextComponent";
 
+type IconParams = {
+  name: string;
+  size?: number;
+  color?: string;
+};
+
 type ButtonProps = StyleProp<ViewStyle> & {
   label: string;
   onclick: () => void;
   isLoading?: boolean;
   disable?: boolean;
   isCancelButton?: boolean;
+  icon?: React.ReactNode;
 };
 
 export function ButtonComponent({
@@ -23,6 +30,7 @@ export function ButtonComponent({
   isLoading,
   disable,
   isCancelButton,
+  icon,
 }: ButtonProps) {
   const cancelBackground = isCancelButton ? "#fff" : Palette.Theme2.standard;
   const cancelText = isCancelButton ? Palette.Theme2.standard : "#fff";
@@ -38,6 +46,7 @@ export function ButtonComponent({
         onPress={onclick}
         disabled={isLoading || disable}
       >
+        {icon && icon}
         <TextComponent
           weight="bold"
           style={[styles.textButton, { color: cancelText }]}
@@ -56,6 +65,10 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     elevation: 7,
     borderColor: Palette.Theme2.standard,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    justifyContent: "center",
   },
   textButton: {
     color: "white",
