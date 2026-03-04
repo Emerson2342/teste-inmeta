@@ -2,18 +2,18 @@ import Feather from "@expo/vector-icons/build/EvilIcons";
 import { ActivityIndicatorComponent } from "@src/components/ActivityIndicatorComponent";
 import { TextComponent } from "@src/components/TextComponent";
 import { WorkOrder } from "@src/props/types";
+import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
-import { workOrdersMock } from "@src/utils/mockdata";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export function ServiceOrderesComponent() {
   const [loadingData, setLoadingData] = useState(true);
+  const { workOrders, loadFromRealm } = useWorkOrderStore();
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoadingData(false);
-    }, 750);
+    loadFromRealm();
+    setLoadingData(false);
   }, []);
 
   const renderItem = ({ item, index }: { item: WorkOrder; index: number }) => {
@@ -56,7 +56,7 @@ export function ServiceOrderesComponent() {
       </TextComponent>
       {loadingData ? (
         <ActivityIndicatorComponent />
-      ) : (
+      ) : workOrders.length > 0 ? (
         <View>
           <View style={{ flexDirection: "row" }}>
             <TextComponent
@@ -74,9 +74,19 @@ export function ServiceOrderesComponent() {
           </View>
           <FlatList
             keyExtractor={(item) => item.id}
-            data={workOrdersMock}
+            data={workOrders}
             renderItem={renderItem}
           />
+        </View>
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <TextComponent weight="bold">Nenhuma ordem criada!</TextComponent>
         </View>
       )}
     </View>
