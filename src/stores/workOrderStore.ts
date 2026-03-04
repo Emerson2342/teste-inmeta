@@ -1,5 +1,5 @@
-import { WorkOrder } from "@src/props/types";
-import { v4 as uuid } from "uuid";
+import { NewOrderType, WorkOrder } from "@src/props/types";
+import uuid from "react-native-uuid";
 import { create } from "zustand";
 import { realm } from "../database/realm";
 
@@ -7,12 +7,12 @@ type WorkOrderState = {
   workOrders: WorkOrder[];
 
   loadFromRealm: () => void;
-  addWorkOrder: (
-    data: Omit<WorkOrder, "id" | "createdAt" | "updatedAt">,
-  ) => void;
+  addWorkOrder: (data: AddWorkOrderData) => void;
   updateWorkOrder: (order: WorkOrder) => void;
   deleteWorkOrder: (id: string) => void;
 };
+
+type AddWorkOrderData = Pick<WorkOrder, keyof NewOrderType>;
 
 export const useWorkOrderStore = create<WorkOrderState>((set) => ({
   workOrders: [],
@@ -22,13 +22,16 @@ export const useWorkOrderStore = create<WorkOrderState>((set) => ({
     set({ workOrders: [...orders] });
   },
 
-  addWorkOrder: (data) => {
+  addWorkOrder: (data: AddWorkOrderData) => {
     const now = new Date().toISOString();
-
+    const newId = uuid.v4() as string;
     const newOrder: WorkOrder = {
-      id: uuid(),
+      _id: newId,
       createdAt: now,
       updatedAt: now,
+      status: "Pending",
+      completed: false,
+      deleted: false,
       deletedAt: undefined,
       ...data,
     };
@@ -49,7 +52,7 @@ export const useWorkOrderStore = create<WorkOrderState>((set) => ({
 
     set((state) => ({
       workOrders: state.workOrders.map((order) =>
-        order.id === updatedOrder.id ? updatedOrder : order,
+        order._id === updatedOrder._id ? updatedOrder : order,
       ),
     }));
   },
@@ -66,7 +69,7 @@ export const useWorkOrderStore = create<WorkOrderState>((set) => ({
     });
 
     set((state) => ({
-      workOrders: state.workOrders.filter((order) => order.id !== id),
+      workOrders: state.workOrders.filter((order) => order._id !== id),
     }));
   },
 }));

@@ -16,7 +16,7 @@ export interface ThemeColor {
 }
 
 export interface WorkOrder {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   status: "Pending" | "In Progress" | "Completed";
@@ -26,4 +26,10 @@ export interface WorkOrder {
   deletedAt?: string; // ISODate
   completed: boolean;
   deleted: boolean;
+}
+
+export interface NewOrderType {
+  title: string;
+  description: string;
+  assignedTo: string;
 }

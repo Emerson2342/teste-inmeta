@@ -73,7 +73,7 @@ export function ServiceOrderesComponent() {
             </TextComponent>
           </View>
           <FlatList
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item._id}
             data={workOrders}
             renderItem={renderItem}
           />

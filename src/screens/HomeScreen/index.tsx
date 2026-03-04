@@ -1,5 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
 import { ButtonComponent } from "@src/components/ButtonComponent";
+import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
+import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
 import { TextComponent } from "@src/components/TextComponent";
 import { Assets } from "@src/config/assets";
 import { Palette } from "@src/theme/colors";
@@ -21,6 +23,8 @@ export function HomeScreen() {
   const animations = useRef(
     companyServices.map(() => new Animated.Value(0)),
   ).current;
+
+  const [addOrderModalVisible, setAddOrderModalVisible] = useState(false);
 
   const [key, setKey] = useState(0);
 
@@ -86,10 +90,15 @@ export function HomeScreen() {
       <View>
         <ButtonComponent
           label="Adicionar Ordem"
-          onclick={companyServiceAnimation}
+          onclick={() => setAddOrderModalVisible(true)}
           isLoading={false}
         />
       </View>
+      <ModalBaseComponent
+        child={<ModalAddOrder onClose={() => setAddOrderModalVisible(false)} />}
+        onClick={() => {}}
+        visible={addOrderModalVisible}
+      />
     </View>
   );
 }
