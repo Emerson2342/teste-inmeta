@@ -1,4 +1,9 @@
-import { UpdateOrderApi, WorkOrder } from "@src/props/types";
+import {
+  ApiResponse,
+  UpdateOrderApi,
+  WorkOrder,
+  WorkOrderResponse,
+} from "@src/props/types";
 
 const BASE_URL = "https://fieldsync.onrender.com";
 
@@ -12,7 +17,9 @@ export const getWorkOrder = async (id: string) => {
   return response.json();
 };
 
-export const createWorkOrder = async (data: WorkOrder) => {
+export const createWorkOrder = async (
+  data: WorkOrder,
+): Promise<ApiResponse<WorkOrderResponse>> => {
   const response = await fetch(`${BASE_URL}/work-orders`, {
     method: "POST",
     headers: {
@@ -23,11 +30,29 @@ export const createWorkOrder = async (data: WorkOrder) => {
   if (!response.ok) {
     throw new Error("Erro ao criar WorkOrder");
   }
-  return response.json();
+  const responseData = response.ok
+    ? await response.json()
+    : "Erro ao criar a ordem";
+
+  return {
+    data: responseData,
+    message: response.ok ? "Ordem criada com sucesso" : "Erro ao criar a ordem",
+    status: response.status,
+    success: response.ok,
+  };
 };
 
-export const updateWorkOrderAPI = async (data: UpdateOrderApi, id?: string) => {
-  if (!id) throw new Error("Id da ordem inválido");
+export const updateWorkOrderAPI = async (
+  data: UpdateOrderApi,
+  id?: string,
+): Promise<ApiResponse<WorkOrderResponse>> => {
+  if (!id)
+    return {
+      data: undefined,
+      message: "ID da ordem é obrigatório",
+      status: 40,
+      success: false,
+    };
   const response = await fetch(`${BASE_URL}/work-orders/${id}`, {
     method: "PUT",
     headers: {
@@ -36,19 +61,40 @@ export const updateWorkOrderAPI = async (data: UpdateOrderApi, id?: string) => {
     body: JSON.stringify(data),
   });
 
-  return response.json();
+  const responseData = response.ok
+    ? await response.json()
+    : "Erro ao atualizar a ordem";
+
+  return {
+    data: responseData,
+    message: response.ok
+      ? "Ordem atualizada com sucesso"
+      : "Erro ao atualizar a ordem",
+    status: response.status,
+    success: response.ok,
+  };
 };
 
-export const deleteWorkOrder = async (id?: string) => {
-  if (!id) throw new Error("Id da ordem inválido");
+export const deleteWorkOrder = async (
+  id?: string,
+): Promise<ApiResponse<string>> => {
+  if (!id)
+    return {
+      data: "Id inválido",
+      message: "ID da ordem é obrigatório",
+      status: 40,
+      success: false,
+    };
   const response = await fetch(`${BASE_URL}/work-orders/${id}`, {
     method: "DELETE",
   });
 
-  if (response.status === 204) {
-    return { success: true, message: "Order deletadi com sucesso" };
-  }
-
-  const text = await response.text();
-  return text ? JSON.parse(text) : { success: true };
+  return {
+    data: "Ordem apagada com sucesso!",
+    message: response.ok
+      ? "Ordem apagada com sucesso!"
+      : "Erro ao apagar a ordem!",
+    status: response.status,
+    success: response.ok,
+  };
 };

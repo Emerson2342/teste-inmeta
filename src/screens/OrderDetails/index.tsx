@@ -24,7 +24,7 @@ export function OrderDetails({ id }: Props) {
   const order = getOrder(id);
 
   const createdAt = order?.createdAt ? new Date(order.createdAt) : new Date();
-  const updatedAt = order?.updatedAt ? new Date(order.createdAt) : new Date();
+  const updatedAt = order?.updatedAt ? new Date(order.updatedAt) : new Date();
 
   return (
     <View style={{ flex: 1, marginTop: 35 }}>
@@ -40,7 +40,7 @@ export function OrderDetails({ id }: Props) {
             </TextComponent>
             <View style={{ gap: 15 }}>
               <View>
-                <TextComponent>Responsável: </TextComponent>
+                <TextComponent>Responsável Técnico: </TextComponent>
                 <TextComponent weight="bold">{order.assignedTo}</TextComponent>
               </View>
               <View>

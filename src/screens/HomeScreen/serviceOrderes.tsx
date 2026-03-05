@@ -45,7 +45,7 @@ export function ServiceOrderesComponent() {
           style={{ width: "60%" }}
           numberOfLines={1}
         >
-          {index + 1} - {item.serverId}
+          {index + 1} - {item.title}
         </TextComponent>
         <TextComponent
           weight="semibold"
@@ -82,7 +82,7 @@ export function ServiceOrderesComponent() {
               weight="semibold"
               style={{ width: "40%", textAlign: "center" }}
             >
-              Técnico
+              Resp. Técnico
             </TextComponent>
           </View>
           <FlatList

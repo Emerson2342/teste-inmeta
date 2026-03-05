@@ -22,13 +22,25 @@ export interface WorkOrder {
   description: string;
   status: "Pending" | "In Progress" | "Completed";
   assignedTo: string;
-  createdAt: string; // ISODate
-  updatedAt: string; // ISODate
-  deletedAt?: string; // ISODate
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
   completed: boolean;
   deleted: boolean;
   pendingSync: boolean;
   localDeleted: boolean;
+}
+
+export interface WorkOrderResponse {
+  id: string;
+  title: string;
+  description: string;
+  assignedTo: string;
+  status: "Pending" | "In Progress" | "Completed";
+  createdAt: string;
+  updatedAt: string;
+  completed: boolean;
+  deleted: boolean;
 }
 
 export interface NewOrderType {
@@ -51,4 +63,11 @@ export interface UpdateOrderApi {
   description: string;
   status: "Pending" | "In Progress" | "Completed";
   assignedTo: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message: string;
+  status: number;
 }

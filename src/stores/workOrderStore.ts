@@ -9,6 +9,7 @@ import {
   UpdateOrderApi,
   UpdateOrderProps,
   WorkOrder,
+  WorkOrderResponse,
 } from "@src/props/types";
 import { BASE_URL } from "@src/utils/const";
 import uuid from "react-native-uuid";
@@ -100,13 +101,15 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
 
     try {
       const createOrder = await createWorkOrder(newOrder);
+      if (!createOrder.data) return;
+      const res = createOrder.data as WorkOrderResponse;
       get().updateWorkOrder({
         localId: newId,
-        serverId: createOrder.id,
-        assignedTo: createOrder.assignedTo,
-        description: createOrder.description,
-        status: createOrder.status,
-        title: createOrder.title,
+        serverId: res.id,
+        assignedTo: res.assignedTo,
+        description: res.description,
+        status: res.status,
+        title: res.title,
         pendingSync: false,
       });
     } catch (error: any) {
@@ -142,18 +145,38 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
       };
 
       const apiResponse = await updateWorkOrderAPI(payload, fullOrder.serverId);
-
+      const res = apiResponse.data;
+      if (!res) return;
+      console.log(JSON.stringify(res, null, 2));
+      realm.write(() => {
+        const order = realm.objectForPrimaryKey<WorkOrder>(
+          "WorkOrder",
+          fullOrder.localId,
+        );
+        if (order) {
+          order.serverId = res.id;
+          order.assignedTo = res.assignedTo;
+          order.description = res.description;
+          order.status = res.status;
+          order.title = res.title;
+          order.pendingSync = false;
+          order.createdAt = res.createdAt;
+          order.updatedAt = res.updatedAt;
+        }
+      });
       set((state) => ({
         workOrders: state.workOrders.map((order) =>
           order.localId === fullOrder.localId
             ? {
                 ...order,
-                serverId: apiResponse.id,
-                assignedTo: apiResponse.assignedTo,
-                description: apiResponse.description,
-                status: apiResponse.status,
-                title: apiResponse.title,
+                serverId: res.id,
+                assignedTo: res.assignedTo,
+                description: res.description,
+                createdAt: res.createdAt,
+                status: res.status,
+                title: res.title,
                 pendingSync: false,
+                updatedAt: res.updatedAt,
               }
             : order,
         ),
