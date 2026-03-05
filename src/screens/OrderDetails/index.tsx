@@ -100,7 +100,7 @@ export function OrderDetails({ id }: Props) {
             visible={modalDeleteVisible}
             child={
               <ModalDeleteOrder
-                id={order._id}
+                id={order.localId}
                 title={order.title}
                 onClose={() => setModalDeleteVisible(false)}
               />
@@ -117,7 +117,7 @@ export function OrderDetails({ id }: Props) {
           />
         </View>
       ) : (
-        <TextComponent>Ordem não encontrada!</TextComponent>
+        <TextComponent>Ordem não encontrada! {id}</TextComponent>
       )}
     </View>
   );

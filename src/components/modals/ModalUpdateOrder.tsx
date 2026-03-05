@@ -18,7 +18,7 @@ const status = [
 
 export function ModalUpdateOrder({ onClose, order }: ModalAddProps) {
   const [orderUpdated, setOrderUpdated] = useState<UpdateOrderProps>({
-    _id: "",
+    localId: "",
     assignedTo: "",
     description: "",
     title: "",
@@ -28,7 +28,7 @@ export function ModalUpdateOrder({ onClose, order }: ModalAddProps) {
 
   useEffect(() => {
     setOrderUpdated({
-      _id: order._id,
+      localId: order.localId,
       assignedTo: order.assignedTo,
       description: order.description,
       status: order.status,

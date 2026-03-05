@@ -4,6 +4,8 @@ import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
 import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
 import { TextComponent } from "@src/components/TextComponent";
+import { useSyncStore } from "@src/stores/syncStore";
+import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, View } from "react-native";
@@ -26,9 +28,17 @@ export function HomeScreen() {
   const [addOrderModalVisible, setAddOrderModalVisible] = useState(false);
 
   const [key, setKey] = useState(0);
-
+  const initialSync = useWorkOrderStore((state) => state.initialSync);
+  const { resetLastSync, loadLastSync } = useSyncStore.getState();
   useEffect(() => {
-    companyServiceAnimation();
+    const init = async () => {
+      companyServiceAnimation();
+
+      await loadLastSync();
+      await initialSync();
+    };
+
+    init();
   }, []);
 
   const companyServiceAnimation = () => {
@@ -78,16 +88,20 @@ export function HomeScreen() {
       <View style={{ flex: 0.5, marginHorizontal: 15 }}>
         <ServiceOrderesComponent key={key} />
       </View>
-      <View style={{ alignItems: "center" }}>
+      <View style={{ alignItems: "center", gap: 15 }}>
         <ButtonComponent
           label="Adicionar Ordem"
           onclick={() => setAddOrderModalVisible(true)}
           isLoading={false}
         />
+        <ButtonComponent
+          label="Zerar syncStorage"
+          onclick={async () => await resetLastSync()}
+          isLoading={false}
+        />
       </View>
       <ModalBaseComponent
         child={<ModalAddOrder onClose={() => setAddOrderModalVisible(false)} />}
-        onClick={() => {}}
         visible={addOrderModalVisible}
       />
     </View>

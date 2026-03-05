@@ -1,7 +1,8 @@
 import { Realm } from "@realm/react";
 
 export class WorkOrderSchema extends Realm.Object {
-  id!: string;
+  localId!: string;
+  serverId?: string;
   title!: string;
   description!: string;
   status!: "Pending" | "In Progress" | "Completed";
@@ -11,12 +12,15 @@ export class WorkOrderSchema extends Realm.Object {
   deletedAt?: string;
   completed!: boolean;
   deleted!: boolean;
+  pendingSync!: boolean;
+  localDeleted!: boolean;
 
   static schema: Realm.ObjectSchema = {
     name: "WorkOrder",
-    primaryKey: "_id",
+    primaryKey: "localId",
     properties: {
-      _id: "string",
+      localId: "string",
+      serverId: "string?",
       title: "string",
       description: "string",
       status: "string",
@@ -26,6 +30,8 @@ export class WorkOrderSchema extends Realm.Object {
       deletedAt: "string?",
       completed: "bool",
       deleted: "bool",
+      pendingSync: "bool",
+      localDeleted: "bool",
     },
   };
 }

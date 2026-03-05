@@ -16,7 +16,8 @@ export interface ThemeColor {
 }
 
 export interface WorkOrder {
-  _id: string;
+  localId: string;
+  serverId?: string;
   title: string;
   description: string;
   status: "Pending" | "In Progress" | "Completed";
@@ -26,6 +27,8 @@ export interface WorkOrder {
   deletedAt?: string; // ISODate
   completed: boolean;
   deleted: boolean;
+  pendingSync: boolean;
+  localDeleted: boolean;
 }
 
 export interface NewOrderType {
@@ -34,7 +37,16 @@ export interface NewOrderType {
   assignedTo: string;
 }
 export interface UpdateOrderProps {
-  _id: string;
+  localId: string;
+  serverId?: string;
+  title: string;
+  description: string;
+  status: "Pending" | "In Progress" | "Completed";
+  assignedTo: string;
+  pendingSync?: boolean;
+}
+
+export interface UpdateOrderApi {
   title: string;
   description: string;
   status: "Pending" | "In Progress" | "Completed";

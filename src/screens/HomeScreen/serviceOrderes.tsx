@@ -19,7 +19,7 @@ export function ServiceOrderesComponent() {
     setLoadingData(false);
   }, []);
 
-  const filteredOrders = workOrders.filter((o) => o.deleted === false);
+  const filteredOrders = workOrders.filter((o) => o.localDeleted === false);
 
   const renderItem = ({ item, index }: { item: WorkOrder; index: number }) => {
     const isOdd = index % 2 === 0;
@@ -30,7 +30,7 @@ export function ServiceOrderesComponent() {
           router.push({
             pathname: "/order-details",
             params: {
-              id: item._id,
+              id: item.localId,
             },
           })
         }
@@ -45,7 +45,7 @@ export function ServiceOrderesComponent() {
           style={{ width: "60%" }}
           numberOfLines={1}
         >
-          {index + 1} - {item.title}
+          {index + 1} - {item.serverId}
         </TextComponent>
         <TextComponent
           weight="semibold"
@@ -86,7 +86,7 @@ export function ServiceOrderesComponent() {
             </TextComponent>
           </View>
           <FlatList
-            keyExtractor={(item) => item._id}
+            keyExtractor={(item) => item.localId}
             data={filteredOrders}
             renderItem={renderItem}
           />
