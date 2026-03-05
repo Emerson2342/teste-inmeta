@@ -22,6 +22,7 @@ type WorkOrderState = {
   initialSync: () => Promise<void>;
   loadFromRealm: () => void;
   addWorkOrder: (data: AddWorkOrderData) => void;
+  addWorkOrderFromAPI: (data: WorkOrder) => void;
   updateWorkOrder: (order: UpdateOrderProps) => void;
   deleteWorkOrder: (id: string) => void;
   getOrder: (id: string) => WorkOrder | null;
@@ -116,6 +117,17 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
       console.log("Não foi possível fazer o sync POST");
     }
   },
+  addWorkOrderFromAPI: async (data: WorkOrder) => {
+    const newOrder: WorkOrder = { ...data };
+
+    realm.write(() => {
+      realm.create("WorkOrder", newOrder);
+    });
+
+    set((state) => ({
+      workOrders: [...state.workOrders, newOrder],
+    }));
+  },
 
   updateWorkOrder: async (
     updatedOrder: Partial<WorkOrder> & { localId: string },
@@ -147,7 +159,6 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
       const apiResponse = await updateWorkOrderAPI(payload, fullOrder.serverId);
       const res = apiResponse.data;
       if (!res) return;
-      console.log(JSON.stringify(res, null, 2));
       realm.write(() => {
         const order = realm.objectForPrimaryKey<WorkOrder>(
           "WorkOrder",

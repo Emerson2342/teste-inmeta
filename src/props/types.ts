@@ -71,3 +71,9 @@ export interface ApiResponse<T> {
   message: string;
   status: number;
 }
+
+export interface SynIncrementalResponse {
+  created: WorkOrderResponse[];
+  updated: WorkOrderResponse[];
+  deleted: WorkOrderResponse[];
+}

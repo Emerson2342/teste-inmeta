@@ -4,6 +4,7 @@ import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
 import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
 import { TextComponent } from "@src/components/TextComponent";
+import { syncWorkOrdersService } from "@src/services/syncWorkOrders";
 import { useSyncStore } from "@src/stores/syncStore";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
@@ -36,6 +37,7 @@ export function HomeScreen() {
 
       await loadLastSync();
       await initialSync();
+      await syncWorkOrdersService();
     };
 
     init();
