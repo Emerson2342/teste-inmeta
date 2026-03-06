@@ -159,7 +159,6 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
               ...order,
               ...updatedOrder,
               pendingSync: true,
-              updatedAt: new Date().toISOString(),
             }
           : order,
       ),
@@ -242,6 +241,7 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
         "WorkOrder",
         updatedOrder.localId,
       );
+
       if (!fullOrder) throw new Error("Ordem não encontrada no Realm");
       const payload: UpdateOrderApi = {
         title: fullOrder.title,
@@ -251,10 +251,12 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
       };
       const apiResponse = await updateWorkOrderAPI(payload, fullOrder.serverId);
       realm.write(() => {
-        fullOrder.updatedAt =
-          apiResponse.data?.updatedAt ?? new Date().toISOString();
-        fullOrder.createdAt =
-          apiResponse.data?.createdAt ?? fullOrder.createdAt;
+        if (apiResponse.data?.updatedAt) {
+          fullOrder.updatedAt = apiResponse.data.updatedAt;
+        }
+        if (apiResponse.data?.createdAt) {
+          fullOrder.createdAt = apiResponse.data.createdAt;
+        }
         fullOrder.pendingSync = !apiResponse.success;
       });
     } catch (e: any) {
@@ -264,6 +266,11 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
   updateWorkerOrderFromAPi: async (
     updatedOrder: Partial<WorkOrder> & { localId: string },
   ) => {
+    const antes = realm.objectForPrimaryKey<WorkOrder>(
+      "WorkOrder",
+      updatedOrder.localId,
+    );
+
     realm.write(() => {
       realm.create(
         "WorkOrder",

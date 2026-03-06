@@ -48,7 +48,7 @@ export function ServiceOrderesComponent() {
             style={styles.itemTitle}
             numberOfLines={1}
           >
-            {index + 1} - {order.pendingSync.toString()} - {order.title}
+            {index + 1} - {order.title}
           </TextComponent>
           <TextComponent
             weight="semibold"

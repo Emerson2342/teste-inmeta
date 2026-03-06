@@ -8,7 +8,7 @@ import { TextComponent } from "@src/components/TextComponent";
 import {
   syncPendingOrders,
   syncWorkOrdersService,
-} from "@src/services/syncWorkOrders";
+} from "@src/services/syncWorkOrdersService";
 import { useSyncStore } from "@src/stores/syncStore";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
