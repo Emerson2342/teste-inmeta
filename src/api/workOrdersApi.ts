@@ -4,8 +4,7 @@ import {
   WorkOrder,
   WorkOrderResponse,
 } from "@src/props/types";
-
-const BASE_URL = "https://fieldsync.onrender.com";
+import { BASE_URL } from "@src/utils/const";
 
 export const getWorkOrders = async () => {
   const response = await fetch(`${BASE_URL}/work-orders`);
@@ -47,7 +46,6 @@ export const updateWorkOrderAPI = async (
   id?: string,
 ): Promise<ApiResponse<WorkOrderResponse>> => {
   if (!id) {
-    alert(0);
     return {
       data: undefined,
       message: "ID da ordem é obrigatório",
@@ -66,7 +64,6 @@ export const updateWorkOrderAPI = async (
     });
 
     const responseData = response.ok ? await response.json() : undefined;
-    alert(1111);
     return {
       data: responseData,
       message: response.ok
@@ -76,7 +73,6 @@ export const updateWorkOrderAPI = async (
       success: response.ok,
     };
   } catch (error) {
-    alert(2222);
     return {
       data: undefined,
       message: "Erro de conexão com a API",

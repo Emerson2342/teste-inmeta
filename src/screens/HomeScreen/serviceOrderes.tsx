@@ -5,7 +5,7 @@ import { WorkOrder } from "@src/props/types";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export function ServiceOrderesComponent() {
@@ -19,49 +19,49 @@ export function ServiceOrderesComponent() {
     setLoadingData(false);
   }, []);
 
-  const filteredOrders = workOrders.filter((o) => o.localDeleted === false);
+  const filteredOrders = useMemo(() => {
+    return workOrders.filter((o) => o.localDeleted === false);
+  }, [workOrders]);
 
-  const renderItem = ({ item, index }: { item: WorkOrder; index: number }) => {
-    const isOdd = index % 2 === 0;
+  const renderItemMemo = useCallback(
+    ({ item, index }: { item: WorkOrder; index: number }) => {
+      return <OrderItem order={item} index={index} />;
+    },
+    [],
+  );
 
-    return (
-      <TouchableOpacity
-        onPress={() =>
-          router.push({
-            pathname: "/order-details",
-            params: {
-              id: item.localId,
-            },
-          })
-        }
-        style={{
-          flexDirection: "row",
-          backgroundColor: isOdd ? Palette.Theme1.light : undefined,
-          marginTop: 5,
-        }}
-      >
-        <TextComponent
-          weight="semibold"
-          style={{ width: "60%" }}
-          numberOfLines={1}
+  const OrderItem = React.memo(
+    ({ order, index }: { order: WorkOrder; index: number }) => {
+      const isOdd = index % 2 === 0;
+      return (
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/order-details",
+              params: { id: order.localId },
+            })
+          }
+          style={[styles.itemRow, isOdd && styles.itemOdd]}
         >
-          {index + 1} - {item.pendingSync.toString()} - {item.updatedAt}
-        </TextComponent>
-        <TextComponent
-          weight="semibold"
-          style={{
-            width: "33%",
-            textAlign: "center",
-          }}
-          numberOfLines={1}
-        >
-          {item.assignedTo}
-        </TextComponent>
-        <Feather style={{ width: "7%" }} name="external-link" size={25} />
-      </TouchableOpacity>
-    );
-  };
-
+          <TextComponent
+            weight="semibold"
+            style={styles.itemTitle}
+            numberOfLines={1}
+          >
+            {index + 1} - {order.title}
+          </TextComponent>
+          <TextComponent
+            weight="semibold"
+            style={styles.itemAssigned}
+            numberOfLines={1}
+          >
+            {order.assignedTo}
+          </TextComponent>
+          <Feather style={styles.itemIcon} name="external-link" size={25} />
+        </TouchableOpacity>
+      );
+    },
+  );
   return (
     <View style={styles.container}>
       <TextComponent weight="semibold" style={{ textAlign: "center" }}>
@@ -70,7 +70,7 @@ export function ServiceOrderesComponent() {
       {loadingData ? (
         <ActivityIndicatorComponent />
       ) : filteredOrders.length > 0 ? (
-        <View>
+        <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row" }}>
             <TextComponent
               weight="semibold"
@@ -86,9 +86,13 @@ export function ServiceOrderesComponent() {
             </TextComponent>
           </View>
           <FlatList
-            keyExtractor={(item) => item.localId}
+            style={{ flex: 0.9 }}
             data={filteredOrders}
-            renderItem={renderItem}
+            renderItem={renderItemMemo}
+            keyExtractor={(item) => item.localId}
+            initialNumToRender={15}
+            maxToRenderPerBatch={10}
+            windowSize={5}
           />
         </View>
       ) : (
@@ -117,4 +121,9 @@ const styles = StyleSheet.create({
     elevation: 7,
     paddingHorizontal: 7,
   },
+  itemRow: { flexDirection: "row" },
+  itemOdd: { backgroundColor: Palette.Theme1.light },
+  itemTitle: { width: "60%" },
+  itemAssigned: { width: "33%", textAlign: "center" },
+  itemIcon: { width: "7%" },
 });

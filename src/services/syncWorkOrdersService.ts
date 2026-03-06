@@ -47,20 +47,12 @@ export const syncWorkOrdersService = async (): Promise<
         data: undefined,
       };
     }
-
-    if (!response.ok) {
-      return {
-        message: "Erro ao buscar os dados da API",
-        status: response.status,
-        success: response.ok,
-        data: undefined,
-      };
-    }
     const data = (await response.json()) as SynIncrementalResponse;
     for (const c of data.created) {
       const exists = realm
         .objects<WorkOrder>("WorkOrder")
         .filtered("serverId == $0", c.id)[0];
+
       if (!exists) {
         addWorkOrderFromAPI({
           localId: c.id,
@@ -85,12 +77,15 @@ export const syncWorkOrdersService = async (): Promise<
         .filtered("serverId == $0", ord.id)[0];
 
       if (!local) continue;
-      const serverUpdatedAt = new Date(ord.updatedAt);
-      const localUpdatedAt = new Date(local.updatedAt);
 
-      if (serverUpdatedAt > localUpdatedAt) {
+      const serverTime = new Date(ord.updatedAt).getTime();
+      const localTime = new Date(local.updatedAt).getTime();
+      console.log("**************************");
+      if (serverTime > localTime) {
+        console.log("→ ATUALIZANDO LOCAL com dados do servidor");
         updateWorkerOrderFromAPi({ localId: local.localId, ...ord });
-      } else if (localUpdatedAt > serverUpdatedAt) {
+      } else if (localTime > serverTime && local.pendingSync) {
+        console.log("→ ENVIANDO LOCAL para o servidor");
         updateWorkOrderOnServer({
           assignedTo: local.assignedTo,
           description: local.description,
@@ -111,7 +106,6 @@ export const syncWorkOrdersService = async (): Promise<
       }
     }
 
-    console.log("Sync incremental", JSON.stringify(data, null, 2));
     await setLastSync(new Date().toISOString());
     return {
       message: "Sync incremental realizado com sucesso",
@@ -120,7 +114,6 @@ export const syncWorkOrdersService = async (): Promise<
       data: data,
     };
   } else {
-    await setLastSync(new Date().toISOString());
     return {
       message: "Primeira entrada no aplicativo!",
       status: 400,
@@ -136,13 +129,16 @@ export const syncPendingOrders = async () => {
     .filtered("pendingSync == true");
 
   for (const order of pendingOrders) {
+    console.log(
+      `🟡 syncPendingOrders - ANTES: localId=${order.localId}, updatedAt=${order.updatedAt}, pendingSync=${order.pendingSync}`,
+    );
     if (!order.serverId) {
       const res = await createWorkOrder(order);
       if (res.success && res.data) {
         realm.write(() => {
           order.serverId = res.data?.id;
           order.pendingSync = false;
-          order.updatedAt = res.data?.updatedAt ?? order.updatedAt;
+          //order.updatedAt = res.data?.updatedAt ?? order.updatedAt;
           order.createdAt = res.data?.createdAt ?? order.createdAt;
         });
       }
@@ -155,6 +151,7 @@ export const syncPendingOrders = async () => {
       };
       const res = await updateWorkOrderAPI(payload, order.serverId);
       if (res.success && res.data) {
+        console.log(`🟢 API RESPONDEU: updatedAt=${res.data.updatedAt}`);
         realm.write(() => {
           order.pendingSync = false;
           order.updatedAt = res.data?.updatedAt ?? order.updatedAt;
