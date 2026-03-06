@@ -1,14 +1,19 @@
 import { AntDesign } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ButtonComponent } from "@src/components/ButtonComponent";
 import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
 import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
 import { TextComponent } from "@src/components/TextComponent";
-import { syncWorkOrdersService } from "@src/services/syncWorkOrders";
+import {
+  syncPendingOrders,
+  syncWorkOrdersService,
+} from "@src/services/syncWorkOrders";
 import { useSyncStore } from "@src/stores/syncStore";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
-import { useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, View } from "react-native";
 import { ServiceOrderesComponent } from "./serviceOrderes";
 
@@ -30,18 +35,36 @@ export function HomeScreen() {
 
   const [key, setKey] = useState(0);
   const initialSync = useWorkOrderStore((state) => state.initialSync);
-  const { resetLastSync, loadLastSync } = useSyncStore.getState();
+  const { loadLastSync } = useSyncStore.getState();
+
   useEffect(() => {
     const init = async () => {
       companyServiceAnimation();
 
       await loadLastSync();
       await initialSync();
-      await syncWorkOrdersService();
     };
-
     init();
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const runSync = async () => {
+        try {
+          await syncPendingOrders();
+          await syncWorkOrdersService();
+        } catch (error) {
+          console.log("Sync ossffline/erro de rede:", error);
+        }
+      };
+      runSync();
+    }, []),
+  );
+
+  const getStore = async () => {
+    const store = await AsyncStorage.getItem("lastSyncAt");
+    console.log(store);
+    console.log(new Date().toISOString());
+  };
 
   const companyServiceAnimation = () => {
     animations.forEach((anim) => anim.setValue(0));
@@ -97,8 +120,8 @@ export function HomeScreen() {
           isLoading={false}
         />
         <ButtonComponent
-          label="Zerar syncStorage"
-          onclick={async () => await resetLastSync()}
+          label="Show sync"
+          onclick={getStore}
           isLoading={false}
         />
       </View>

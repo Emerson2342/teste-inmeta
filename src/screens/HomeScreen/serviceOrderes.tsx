@@ -45,7 +45,7 @@ export function ServiceOrderesComponent() {
           style={{ width: "60%" }}
           numberOfLines={1}
         >
-          {index + 1} - {item.title}
+          {index + 1} - {item.pendingSync.toString()} - {item.updatedAt}
         </TextComponent>
         <TextComponent
           weight="semibold"

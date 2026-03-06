@@ -46,33 +46,44 @@ export const updateWorkOrderAPI = async (
   data: UpdateOrderApi,
   id?: string,
 ): Promise<ApiResponse<WorkOrderResponse>> => {
-  if (!id)
+  if (!id) {
+    alert(0);
     return {
       data: undefined,
       message: "ID da ordem é obrigatório",
-      status: 40,
+      status: 400,
       success: false,
     };
-  const response = await fetch(`${BASE_URL}/work-orders/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  }
 
-  const responseData = response.ok
-    ? await response.json()
-    : "Erro ao atualizar a ordem";
+  try {
+    const response = await fetch(`${BASE_URL}/work-orders/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-  return {
-    data: responseData,
-    message: response.ok
-      ? "Ordem atualizada com sucesso"
-      : "Erro ao atualizar a ordem",
-    status: response.status,
-    success: response.ok,
-  };
+    const responseData = response.ok ? await response.json() : undefined;
+    alert(1111);
+    return {
+      data: responseData,
+      message: response.ok
+        ? "Ordem atualizada com sucesso"
+        : "Erro ao atualizar a ordem",
+      status: response.status,
+      success: response.ok,
+    };
+  } catch (error) {
+    alert(2222);
+    return {
+      data: undefined,
+      message: "Erro de conexão com a API",
+      status: 0,
+      success: false,
+    };
+  }
 };
 
 export const deleteWorkOrder = async (

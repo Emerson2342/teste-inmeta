@@ -17,11 +17,12 @@ type Props = {
 };
 
 export function OrderDetails({ id }: Props) {
-  const { getOrder } = useWorkOrderStore();
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false);
   const [modalUpdateVisible, setModalUpdateVisible] = useState(false);
 
-  const order = getOrder(id);
+  const order = useWorkOrderStore((state) =>
+    state.workOrders.find((o) => o.localId === id),
+  );
 
   const createdAt = order?.createdAt ? new Date(order.createdAt) : new Date();
   const updatedAt = order?.updatedAt ? new Date(order.updatedAt) : new Date();

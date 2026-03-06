@@ -75,5 +75,5 @@ export interface ApiResponse<T> {
 export interface SynIncrementalResponse {
   created: WorkOrderResponse[];
   updated: WorkOrderResponse[];
-  deleted: WorkOrderResponse[];
+  deleted: string[];
 }
