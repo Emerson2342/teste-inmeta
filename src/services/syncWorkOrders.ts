@@ -120,7 +120,6 @@ export const syncWorkOrdersService = async (): Promise<
       data: data,
     };
   } else {
-    await setLastSync(new Date().toISOString());
     return {
       message: "Primeira entrada no aplicativo!",
       status: 400,

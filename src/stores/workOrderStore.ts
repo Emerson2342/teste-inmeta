@@ -44,7 +44,6 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
     const lastSyncAt = await AsyncStorage.getItem("lastSyncAt");
 
     if (!lastSyncAt) {
-      alert(2342);
       const response = await fetch(`${BASE_URL}/work-orders`);
 
       if (response.ok) {
@@ -140,13 +139,26 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
     updatedOrder: Partial<WorkOrder> & { localId: string },
   ) => {
     realm.write(() => {
-      realm.create("WorkOrder", updatedOrder, UpdateMode.Modified);
+      realm.create(
+        "WorkOrder",
+        {
+          ...updatedOrder,
+          pendingSync: true,
+          updatedAt: new Date().toISOString(),
+        },
+        UpdateMode.Modified,
+      );
     });
 
     set((state) => ({
       workOrders: state.workOrders.map((order) =>
         order.localId === updatedOrder.localId
-          ? { ...order, ...updatedOrder }
+          ? {
+              ...order,
+              ...updatedOrder,
+              pendingSync: true,
+              updatedAt: new Date().toISOString(),
+            }
           : order,
       ),
     }));

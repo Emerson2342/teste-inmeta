@@ -33,7 +33,6 @@ export function HomeScreen() {
 
   const [addOrderModalVisible, setAddOrderModalVisible] = useState(false);
 
-  const [key, setKey] = useState(0);
   const initialSync = useWorkOrderStore((state) => state.initialSync);
   const { loadLastSync } = useSyncStore.getState();
 
@@ -68,7 +67,6 @@ export function HomeScreen() {
 
   const companyServiceAnimation = () => {
     animations.forEach((anim) => anim.setValue(0));
-    setKey((prev) => prev + 1);
     const animationsSequence = companyServices.map((_, index) =>
       Animated.timing(animations[index], {
         toValue: 1,
@@ -110,8 +108,8 @@ export function HomeScreen() {
           );
         })}
       </View>
-      <View style={{ flex: 0.5, marginHorizontal: 15 }}>
-        <ServiceOrderesComponent key={key} />
+      <View style={{ flex: 0.7, marginHorizontal: 15 }}>
+        <ServiceOrderesComponent />
       </View>
       <View style={{ alignItems: "center", gap: 15 }}>
         <ButtonComponent

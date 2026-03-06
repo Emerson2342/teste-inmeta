@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
 import { ButtonComponent } from "@src/components/ButtonComponent";
 import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
@@ -9,7 +10,7 @@ import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
 import { WorkOrderStatus } from "@src/utils/Enums";
 import { getStatusLabel } from "@src/utils/WorkerStatus";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 type Props = {
@@ -19,6 +20,15 @@ type Props = {
 export function OrderDetails({ id }: Props) {
   const [modalDeleteVisible, setModalDeleteVisible] = useState(false);
   const [modalUpdateVisible, setModalUpdateVisible] = useState(false);
+  const [isConnected, setIsConnected] = useState<boolean>(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsConnected(!!state.isConnected);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const order = useWorkOrderStore((state) =>
     state.workOrders.find((o) => o.localId === id),
@@ -89,11 +99,11 @@ export function OrderDetails({ id }: Props) {
               }
               label="Editar Ordem"
               onclick={() => setModalUpdateVisible(true)}
-              //onclick={() => alert(2342)}
             />
             <ButtonComponent
               icon={<Feather name="trash-2" color={"white"} size={17} />}
               label="Apagar Ordem"
+              disable={!isConnected}
               onclick={() => setModalDeleteVisible(true)}
             />
           </View>
