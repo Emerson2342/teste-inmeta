@@ -85,12 +85,12 @@ export const syncWorkOrdersService = async (): Promise<
         .filtered("serverId == $0", ord.id)[0];
 
       if (!local) continue;
-      const serverUpdatedAt = new Date(ord.updatedAt);
-      const localUpdatedAt = new Date(local.updatedAt);
+      const serverTime = new Date(ord.updatedAt).getTime();
+      const localTime = new Date(local.updatedAt).getTime();
 
-      if (serverUpdatedAt > localUpdatedAt) {
+      if (serverTime > localTime) {
         updateWorkerOrderFromAPi({ localId: local.localId, ...ord });
-      } else if (localUpdatedAt > serverUpdatedAt) {
+      } else if (localTime > serverTime) {
         updateWorkOrderOnServer({
           assignedTo: local.assignedTo,
           description: local.description,

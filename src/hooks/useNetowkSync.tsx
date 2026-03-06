@@ -3,22 +3,23 @@ import {
   syncPendingOrders,
   syncWorkOrdersService,
 } from "@src/services/syncWorkOrders";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+
+let isSyncing = false;
 
 export function useNetworkSync() {
-  const [isSyncing, setIsSyncing] = useState(false);
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
-      console.log("Is connected? " + state.isConnected);
-      if (state.isConnected && !isSyncing) {
-        setIsSyncing(true);
+      if (state.isConnected) {
+        if (isSyncing) return;
+        isSyncing = true;
         try {
           await syncPendingOrders();
           await syncWorkOrdersService();
         } catch (e) {
           console.log("Erro ao sincronizar", e);
         } finally {
-          setIsSyncing(false);
+          isSyncing = false;
         }
       }
     });

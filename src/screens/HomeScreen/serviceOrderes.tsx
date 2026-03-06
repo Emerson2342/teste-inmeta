@@ -5,7 +5,7 @@ import { WorkOrder } from "@src/props/types";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export function ServiceOrderesComponent() {
@@ -19,7 +19,9 @@ export function ServiceOrderesComponent() {
     setLoadingData(false);
   }, []);
 
-  const filteredOrders = workOrders.filter((o) => o.localDeleted === false);
+  const filteredOrders = useMemo(() => {
+    return workOrders.filter((o) => o.localDeleted === false);
+  }, [workOrders]);
 
   const renderItemMemo = useCallback(
     ({ item, index }: { item: WorkOrder; index: number }) => {

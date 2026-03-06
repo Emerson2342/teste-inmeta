@@ -33,6 +33,7 @@ type WorkOrderState = {
   updateWorkOrder: (order: UpdateOrderProps) => void;
   deleteWorkOrder: (id: string) => void;
   getOrder: (id: string) => WorkOrder | null;
+  setWorkOrders: (orders: WorkOrder[]) => void;
 };
 
 type AddWorkOrderData = Pick<WorkOrder, keyof NewOrderType>;
@@ -40,6 +41,7 @@ type AddWorkOrderData = Pick<WorkOrder, keyof NewOrderType>;
 export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
   workOrders: [],
 
+  setWorkOrders: (orders: WorkOrder[]) => set({ workOrders: orders }),
   initialSync: async () => {
     const lastSyncAt = await AsyncStorage.getItem("lastSyncAt");
 
