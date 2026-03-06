@@ -1,11 +1,20 @@
 import { AntDesign } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ButtonComponent } from "@src/components/ButtonComponent";
+import { LogoComponent } from "@src/components/LogoComponente";
+import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
+import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
 import { TextComponent } from "@src/components/TextComponent";
-import { Assets } from "@src/config/assets";
+import {
+  syncPendingOrders,
+  syncWorkOrdersService,
+} from "@src/services/syncWorkOrders";
+import { useSyncStore } from "@src/stores/syncStore";
+import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
-import { useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, View } from "react-native";
-import { SvgUri } from "react-native-svg";
 import { ServiceOrderesComponent } from "./serviceOrderes";
 
 const companyServices: string[] = [
@@ -22,11 +31,40 @@ export function HomeScreen() {
     companyServices.map(() => new Animated.Value(0)),
   ).current;
 
+  const [addOrderModalVisible, setAddOrderModalVisible] = useState(false);
+
   const [key, setKey] = useState(0);
+  const initialSync = useWorkOrderStore((state) => state.initialSync);
+  const { loadLastSync } = useSyncStore.getState();
 
   useEffect(() => {
-    companyServiceAnimation();
+    const init = async () => {
+      companyServiceAnimation();
+
+      await loadLastSync();
+      await initialSync();
+    };
+    init();
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const runSync = async () => {
+        try {
+          await syncPendingOrders();
+          await syncWorkOrdersService();
+        } catch (error) {
+          console.log("Sync ossffline/erro de rede:", error);
+        }
+      };
+      runSync();
+    }, []),
+  );
+
+  const getStore = async () => {
+    const store = await AsyncStorage.getItem("lastSyncAt");
+    console.log(store);
+    console.log(new Date().toISOString());
+  };
 
   const companyServiceAnimation = () => {
     animations.forEach((anim) => anim.setValue(0));
@@ -44,15 +82,7 @@ export function HomeScreen() {
   };
   return (
     <View style={{ flex: 1 }}>
-      <View
-        style={{
-          alignItems: "center",
-          flex: 0.1,
-          justifyContent: "center",
-        }}
-      >
-        <SvgUri width="250" uri={Assets.LOGO_URL} />
-      </View>
+      <LogoComponent />
       <View>
         {companyServices.map((item, index) => {
           const translateX = animations[index].interpolate({
@@ -83,13 +113,22 @@ export function HomeScreen() {
       <View style={{ flex: 0.5, marginHorizontal: 15 }}>
         <ServiceOrderesComponent key={key} />
       </View>
-      <View>
+      <View style={{ alignItems: "center", gap: 15 }}>
         <ButtonComponent
           label="Adicionar Ordem"
-          onclick={companyServiceAnimation}
+          onclick={() => setAddOrderModalVisible(true)}
+          isLoading={false}
+        />
+        <ButtonComponent
+          label="Show sync"
+          onclick={getStore}
           isLoading={false}
         />
       </View>
+      <ModalBaseComponent
+        child={<ModalAddOrder onClose={() => setAddOrderModalVisible(false)} />}
+        visible={addOrderModalVisible}
+      />
     </View>
   );
 }

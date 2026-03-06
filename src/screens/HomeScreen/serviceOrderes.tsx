@@ -4,6 +4,7 @@ import { TextComponent } from "@src/components/TextComponent";
 import { WorkOrder } from "@src/props/types";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -11,16 +12,28 @@ export function ServiceOrderesComponent() {
   const [loadingData, setLoadingData] = useState(true);
   const { workOrders, loadFromRealm } = useWorkOrderStore();
 
+  const router = useRouter();
+
   useEffect(() => {
     loadFromRealm();
     setLoadingData(false);
   }, []);
+
+  const filteredOrders = workOrders.filter((o) => o.localDeleted === false);
 
   const renderItem = ({ item, index }: { item: WorkOrder; index: number }) => {
     const isOdd = index % 2 === 0;
 
     return (
       <TouchableOpacity
+        onPress={() =>
+          router.push({
+            pathname: "/order-details",
+            params: {
+              id: item.localId,
+            },
+          })
+        }
         style={{
           flexDirection: "row",
           backgroundColor: isOdd ? Palette.Theme1.light : undefined,
@@ -32,7 +45,7 @@ export function ServiceOrderesComponent() {
           style={{ width: "60%" }}
           numberOfLines={1}
         >
-          {index + 1} - {item.title}
+          {index + 1} - {item.pendingSync.toString()} - {item.updatedAt}
         </TextComponent>
         <TextComponent
           weight="semibold"
@@ -56,7 +69,7 @@ export function ServiceOrderesComponent() {
       </TextComponent>
       {loadingData ? (
         <ActivityIndicatorComponent />
-      ) : workOrders.length > 0 ? (
+      ) : filteredOrders.length > 0 ? (
         <View>
           <View style={{ flexDirection: "row" }}>
             <TextComponent
@@ -69,12 +82,12 @@ export function ServiceOrderesComponent() {
               weight="semibold"
               style={{ width: "40%", textAlign: "center" }}
             >
-              Técnico
+              Resp. Técnico
             </TextComponent>
           </View>
           <FlatList
-            keyExtractor={(item) => item.id}
-            data={workOrders}
+            keyExtractor={(item) => item.localId}
+            data={filteredOrders}
             renderItem={renderItem}
           />
         </View>

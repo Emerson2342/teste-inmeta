@@ -9,6 +9,6 @@ export function HeaderComponent() {
 const styles = StyleSheet.create({
   container: {
     height: 70,
-    backgroundColor: Palette.Theme1.dark,
+    backgroundColor: Palette.Theme2.standard,
   },
 });

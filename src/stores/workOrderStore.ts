@@ -1,35 +1,102 @@
-import { WorkOrder } from "@src/props/types";
-import { v4 as uuid } from "uuid";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  createWorkOrder,
+  deleteWorkOrder,
+  updateWorkOrderAPI,
+} from "@src/api/workOrdersApi";
+import {
+  NewOrderType,
+  UpdateOrderApi,
+  UpdateOrderProps,
+  WorkOrder,
+  WorkOrderResponse,
+} from "@src/props/types";
+import { BASE_URL } from "@src/utils/const";
+import uuid from "react-native-uuid";
+import { UpdateMode } from "realm";
 import { create } from "zustand";
 import { realm } from "../database/realm";
 
 type WorkOrderState = {
   workOrders: WorkOrder[];
-
+  initialSync: () => Promise<void>;
   loadFromRealm: () => void;
-  addWorkOrder: (
-    data: Omit<WorkOrder, "id" | "createdAt" | "updatedAt">,
+  addWorkOrder: (data: AddWorkOrderData) => void;
+  addWorkOrderFromAPI: (data: WorkOrder) => void;
+  deleteWorkOrderFromAPI: (id: string) => void;
+  updateWorkOrderOnServer: (
+    data: Partial<WorkOrder> & { localId: string },
   ) => void;
-  updateWorkOrder: (order: WorkOrder) => void;
+  updateWorkerOrderFromAPi: (
+    updatedOrder: Partial<WorkOrder> & { localId: string },
+  ) => void;
+  updateWorkOrder: (order: UpdateOrderProps) => void;
   deleteWorkOrder: (id: string) => void;
+  getOrder: (id: string) => WorkOrder | null;
 };
 
-export const useWorkOrderStore = create<WorkOrderState>((set) => ({
+type AddWorkOrderData = Pick<WorkOrder, keyof NewOrderType>;
+
+export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
   workOrders: [],
+
+  initialSync: async () => {
+    const lastSyncAt = await AsyncStorage.getItem("lastSyncAt");
+
+    if (!lastSyncAt) {
+      alert(2342);
+      const response = await fetch(`${BASE_URL}/work-orders`);
+
+      if (response.ok) {
+        const data = await response.json();
+        realm.write(() => {
+          data.forEach((order: any) => {
+            const mappedOrder: WorkOrder = {
+              localId: order.id,
+              serverId: order.id,
+              title: order.title,
+              description: order.description,
+              assignedTo: order.assignedTo,
+              status: order.status,
+              createdAt: order.createdAt,
+              updatedAt: order.updatedAt,
+              completed: order.completed,
+              deleted: order.deleted,
+              deletedAt: undefined,
+              pendingSync: false,
+              localDeleted: false,
+            };
+
+            realm.create("WorkOrder", mappedOrder);
+          });
+        });
+        const orders = realm.objects<WorkOrder>("WorkOrder");
+        set({ workOrders: [...orders] });
+
+        await AsyncStorage.setItem("lastSyncAt", new Date().toISOString());
+      }
+    }
+  },
 
   loadFromRealm: () => {
     const orders = realm.objects<WorkOrder>("WorkOrder");
     set({ workOrders: [...orders] });
   },
 
-  addWorkOrder: (data) => {
+  addWorkOrder: async (data: AddWorkOrderData) => {
     const now = new Date().toISOString();
-
+    const newId = uuid.v4() as string;
     const newOrder: WorkOrder = {
-      id: uuid(),
+      localId: newId,
+      serverId: undefined,
       createdAt: now,
       updatedAt: now,
+      status: "Pending",
+      completed: false,
+      deleted: false,
       deletedAt: undefined,
+      pendingSync: true,
+      localDeleted: false,
       ...data,
     };
 
@@ -40,33 +107,239 @@ export const useWorkOrderStore = create<WorkOrderState>((set) => ({
     set((state) => ({
       workOrders: [...state.workOrders, newOrder],
     }));
-  },
 
-  updateWorkOrder: (updatedOrder) => {
+    try {
+      const createOrder = await createWorkOrder(newOrder);
+      if (!createOrder.data) return;
+      const res = createOrder.data as WorkOrderResponse;
+      get().updateWorkOrder({
+        localId: newId,
+        serverId: res.id,
+        assignedTo: res.assignedTo,
+        description: res.description,
+        status: res.status,
+        title: res.title,
+        pendingSync: false,
+      });
+    } catch (error: any) {
+      console.log("Não foi possível fazer o sync POST");
+    }
+  },
+  addWorkOrderFromAPI: async (data: WorkOrder) => {
+    const newOrder: WorkOrder = { ...data };
+
     realm.write(() => {
-      realm.create("WorkOrder", updatedOrder, Realm.UpdateMode.Modified);
+      realm.create("WorkOrder", newOrder);
+    });
+
+    set((state) => ({
+      workOrders: [...state.workOrders, newOrder],
+    }));
+  },
+  updateWorkOrder: async (
+    updatedOrder: Partial<WorkOrder> & { localId: string },
+  ) => {
+    realm.write(() => {
+      realm.create("WorkOrder", updatedOrder, UpdateMode.Modified);
     });
 
     set((state) => ({
       workOrders: state.workOrders.map((order) =>
-        order.id === updatedOrder.id ? updatedOrder : order,
+        order.localId === updatedOrder.localId
+          ? { ...order, ...updatedOrder }
+          : order,
+      ),
+    }));
+
+    try {
+      const fullOrder = realm.objectForPrimaryKey<WorkOrder>(
+        "WorkOrder",
+        updatedOrder.localId,
+      );
+
+      if (!fullOrder) return;
+
+      const payload: UpdateOrderApi = {
+        title: fullOrder.title,
+        description: fullOrder.description,
+        status: fullOrder.status,
+        assignedTo: fullOrder.assignedTo,
+      };
+
+      const apiResponse = await updateWorkOrderAPI(payload, fullOrder.serverId);
+      if (!apiResponse.success || !apiResponse.data) {
+        const now = new Date().toISOString();
+        realm.write(() => {
+          fullOrder.pendingSync = true;
+          fullOrder.updatedAt = now;
+        });
+
+        set((state) => ({
+          workOrders: state.workOrders.map((order) =>
+            order.localId === updatedOrder.localId
+              ? { ...order, pendingSync: true, updatedAt: now }
+              : order,
+          ),
+        }));
+
+        return;
+      }
+      const res = apiResponse.data;
+
+      realm.write(() => {
+        fullOrder.serverId = res.id;
+        fullOrder.assignedTo = res.assignedTo;
+        fullOrder.description = res.description;
+        fullOrder.status = res.status;
+        fullOrder.title = res.title;
+        fullOrder.pendingSync = false;
+        fullOrder.createdAt = res.createdAt;
+        fullOrder.updatedAt = res.updatedAt;
+      });
+
+      set((state) => ({
+        workOrders: state.workOrders.map((order) =>
+          order.localId === updatedOrder.localId
+            ? {
+                ...order,
+                ...res,
+                pendingSync: false,
+              }
+            : order,
+        ),
+      }));
+    } catch (error) {
+      console.log("Erro ao sincronizar ordem:", error);
+
+      realm.write(() => {
+        const order = realm.objectForPrimaryKey<WorkOrder>(
+          "WorkOrder",
+          updatedOrder.localId,
+        );
+        if (order) order.pendingSync = true;
+      });
+    }
+  },
+  updateWorkOrderOnServer: async (
+    updatedOrder: Partial<WorkOrder> & { localId: string },
+  ) => {
+    try {
+      const fullOrder = realm.objectForPrimaryKey<WorkOrder>(
+        "WorkOrder",
+        updatedOrder.localId,
+      );
+      if (!fullOrder) throw new Error("Ordem não encontrada no Realm");
+      const payload: UpdateOrderApi = {
+        title: fullOrder.title,
+        description: fullOrder.description,
+        status: fullOrder.status,
+        assignedTo: fullOrder.assignedTo,
+      };
+      const apiResponse = await updateWorkOrderAPI(payload, fullOrder.serverId);
+      realm.write(() => {
+        fullOrder.updatedAt =
+          apiResponse.data?.updatedAt ?? new Date().toISOString();
+        fullOrder.createdAt =
+          apiResponse.data?.createdAt ?? fullOrder.createdAt;
+        fullOrder.pendingSync = !apiResponse.success;
+      });
+    } catch (e: any) {
+      console.log("Erro ao atualizar o servirdor", e.message);
+    }
+  },
+  updateWorkerOrderFromAPi: async (
+    updatedOrder: Partial<WorkOrder> & { localId: string },
+  ) => {
+    realm.write(() => {
+      realm.create(
+        "WorkOrder",
+        {
+          ...updatedOrder,
+          pendingSync: false,
+          localDeleted: false,
+        },
+        UpdateMode.Modified,
+      );
+    });
+    set((state) => ({
+      workOrders: state.workOrders.map((order) =>
+        order.localId === updatedOrder.localId
+          ? {
+              ...order,
+              ...updatedOrder,
+              pendingSync: false,
+              localDeleted: false,
+            }
+          : order,
       ),
     }));
   },
-
-  deleteWorkOrder: (id) => {
+  deleteWorkOrderFromAPI: async (localId: string) => {
     const now = new Date().toISOString();
     realm.write(() => {
-      const order = realm.objectForPrimaryKey<WorkOrder>("WorkOrder", id);
+      const order = realm.objectForPrimaryKey<WorkOrder>("WorkOrder", localId);
       if (order) {
-        order.deleted = true;
+        order.localDeleted = true;
         order.deletedAt = now;
         order.updatedAt = now;
+        order.pendingSync = false;
       }
     });
-
     set((state) => ({
-      workOrders: state.workOrders.filter((order) => order.id !== id),
+      workOrders: state.workOrders.map((o) =>
+        o.localId === localId
+          ? { ...o, localDeleted: true, deletedAt: now, updatedAt: now }
+          : o,
+      ),
     }));
+  },
+  deleteWorkOrder: async (id) => {
+    const now = new Date().toISOString();
+    try {
+      const fullOrder = realm.objectForPrimaryKey<WorkOrder>("WorkOrder", id);
+      if (!fullOrder) throw new Error("Ordem não encontrada no Realm");
+
+      await deleteWorkOrder(fullOrder.serverId);
+
+      realm.write(() => {
+        const order = realm.objectForPrimaryKey<WorkOrder>("WorkOrder", id);
+        if (order) {
+          order.localDeleted = true;
+          order.deletedAt = now;
+          order.updatedAt = now;
+          order.pendingSync = false;
+        }
+      });
+
+      set((state) => ({
+        workOrders: state.workOrders.filter((order) => order.localId !== id),
+      }));
+    } catch (error: any) {
+      console.log("Não foi possível fazer o sync DELETE", error);
+    }
+  },
+  getOrder: (id: string): WorkOrder | null => {
+    try {
+      const order = realm.objectForPrimaryKey<WorkOrder>("WorkOrder", id);
+      if (!order) return null;
+
+      return {
+        localId: order.localId,
+        serverId: order?.serverId,
+        title: order.title,
+        description: order.description,
+        status: order.status,
+        deleted: order.deleted,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        assignedTo: order.assignedTo,
+        pendingSync: order.pendingSync,
+        completed: order.completed,
+        localDeleted: false,
+      };
+    } catch (err) {
+      console.error("Erro ao buscar Order:", err);
+      return null;
+    }
   },
 }));
