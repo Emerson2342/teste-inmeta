@@ -32,7 +32,6 @@ export function ServiceOrderesComponent() {
 
   const OrderItem = React.memo(
     ({ order, index }: { order: WorkOrder; index: number }) => {
-      const isOdd = index % 2 === 0;
       return (
         <TouchableOpacity
           onPress={() =>
@@ -41,7 +40,7 @@ export function ServiceOrderesComponent() {
               params: { id: order.localId },
             })
           }
-          style={[styles.itemRow, isOdd && styles.itemOdd]}
+          style={[styles.itemRow]}
         >
           <TextComponent
             weight="semibold"
@@ -64,7 +63,7 @@ export function ServiceOrderesComponent() {
   );
   return (
     <View style={styles.container}>
-      <TextComponent weight="semibold" style={{ textAlign: "center" }}>
+      <TextComponent weight="bold" style={styles.title}>
         Ordens de Serviço
       </TextComponent>
       {loadingData ? (
@@ -113,17 +112,29 @@ export function ServiceOrderesComponent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    gap: 10,
     marginVertical: 30,
     borderRadius: 7,
-    //borderWidth: 1,
     borderColor: Palette.Theme1.semidark,
-    backgroundColor: "#FFF",
-    elevation: 7,
     paddingHorizontal: 7,
   },
-  itemRow: { flexDirection: "row" },
+  title: {
+    textAlign: "center",
+    fontSize: 17,
+  },
+  itemRow: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 7,
+    marginVertical: 3,
+    padding: 5,
+  },
   itemOdd: { backgroundColor: Palette.Theme1.light },
-  itemTitle: { width: "60%" },
-  itemAssigned: { width: "33%", textAlign: "center" },
-  itemIcon: { width: "7%" },
+  itemTitle: { width: "60%", color: "gray" },
+  itemAssigned: {
+    width: "33%",
+    textAlign: "center",
+    color: Palette.Theme1.semidark,
+  },
+  itemIcon: { width: "7%", color: "gray" },
 });

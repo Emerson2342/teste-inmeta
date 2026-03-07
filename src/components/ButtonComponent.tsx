@@ -32,8 +32,8 @@ export function ButtonComponent({
   isCancelButton,
   icon,
 }: ButtonProps) {
-  const cancelBackground = isCancelButton ? "#fff" : Palette.Theme2.standard;
-  const cancelText = isCancelButton ? Palette.Theme2.standard : "#fff";
+  const cancelBackground = isCancelButton ? "#fff" : Palette.Theme1.standard;
+  const cancelText = isCancelButton ? Palette.Theme1.standard : "#fff";
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -61,10 +61,10 @@ export function ButtonComponent({
 const styles = StyleSheet.create({
   container: {},
   buttonContainer: {
-    backgroundColor: Palette.Theme2.standard,
+    backgroundColor: Palette.Theme1.standard,
     borderRadius: 7,
     elevation: 7,
-    borderColor: Palette.Theme2.standard,
+    borderColor: Palette.Theme1.standard,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,

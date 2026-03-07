@@ -39,7 +39,7 @@ export default function RootLayout() {
           },
           headerTintColor: "#fff",
           headerStyle: {
-            backgroundColor: Palette.Theme2.standard,
+            backgroundColor: Palette.Theme1.standard,
           },
         }}
       />

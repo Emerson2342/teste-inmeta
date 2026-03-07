@@ -4,7 +4,7 @@ export const Palette: ThemeColor = {
   Theme1: {
     dark: "#163b28",
     semidark: "#05442f",
-    standard: "#4bc586",
+    standard: "#348a64",
     semilight: "#a5e2c3",
     light: "#dbf3e7",
   },

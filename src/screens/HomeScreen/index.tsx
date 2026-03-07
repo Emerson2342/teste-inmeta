@@ -1,4 +1,4 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { ButtonComponent } from "@src/components/ButtonComponent";
 import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
@@ -95,6 +95,7 @@ export function HomeScreen() {
       </View>
       <View style={{ alignItems: "center", gap: 15 }}>
         <ButtonComponent
+          icon={<Feather color={"#fff"} name="plus" size={20} />}
           label="Adicionar Ordem"
           onclick={() => setAddOrderModalVisible(true)}
           isLoading={false}

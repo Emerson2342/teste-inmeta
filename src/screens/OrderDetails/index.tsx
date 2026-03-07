@@ -93,7 +93,7 @@ export function OrderDetails({ id }: Props) {
               icon={
                 <Feather
                   name="edit"
-                  color={Palette.Theme2.standard}
+                  color={Palette.Theme1.standard}
                   size={17}
                 />
               }

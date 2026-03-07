@@ -1,14 +1,16 @@
+import { FooterComponent } from "@src/components/Footer";
 import { HeaderComponent } from "@src/components/HeaderComponent";
 import { useNetworkSync } from "@src/hooks/useNetowkSync";
 import { HomeScreen } from "@src/screens/HomeScreen";
-import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomePage() {
   useNetworkSync();
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <HeaderComponent />
       <HomeScreen />
-    </View>
+      <FooterComponent />
+    </SafeAreaView>
   );
 }
