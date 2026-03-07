@@ -1,17 +1,13 @@
 import { AntDesign } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ButtonComponent } from "@src/components/ButtonComponent";
 import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
 import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
 import { TextComponent } from "@src/components/TextComponent";
-import {
-  syncPendingOrders,
-  syncWorkOrdersService,
-} from "@src/services/syncWorkOrdersService";
 import { useSyncStore } from "@src/stores/syncStore";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
+import { runSync } from "@src/utils/RunSync";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, View } from "react-native";
@@ -47,23 +43,9 @@ export function HomeScreen() {
   }, []);
   useFocusEffect(
     useCallback(() => {
-      const runSync = async () => {
-        try {
-          await syncPendingOrders();
-          await syncWorkOrdersService();
-        } catch (error) {
-          console.log("Sync ossffline/erro de rede:", error);
-        }
-      };
       runSync();
     }, []),
   );
-
-  const getStore = async () => {
-    const store = await AsyncStorage.getItem("lastSyncAt");
-    console.log(store);
-    console.log(new Date().toISOString());
-  };
 
   const companyServiceAnimation = () => {
     animations.forEach((anim) => anim.setValue(0));
@@ -115,11 +97,6 @@ export function HomeScreen() {
         <ButtonComponent
           label="Adicionar Ordem"
           onclick={() => setAddOrderModalVisible(true)}
-          isLoading={false}
-        />
-        <ButtonComponent
-          label="Show sync"
-          onclick={getStore}
           isLoading={false}
         />
       </View>

@@ -1,28 +1,15 @@
 import NetInfo from "@react-native-community/netinfo";
-import {
-  syncPendingOrders,
-  syncWorkOrdersService,
-} from "@src/services/syncWorkOrdersService";
-import { useEffect, useRef } from "react";
+import { runSync } from "@src/utils/RunSync";
+import { useEffect } from "react";
 
 export function useNetworkSync() {
-  const isSyncing = useRef(false);
-
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(async (state) => {
-      if (state.isConnected) {
-        if (isSyncing.current) return;
-        isSyncing.current = true;
-        try {
-          await syncPendingOrders();
-          await syncWorkOrdersService();
-        } catch (e) {
-          console.log("Erro ao sincronizar", e);
-        } finally {
-          isSyncing.current = false;
-        }
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state.isConnected && state.isInternetReachable) {
+        runSync();
       }
     });
+
     return () => unsubscribe();
   }, []);
 }

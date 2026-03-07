@@ -3,6 +3,7 @@ import { create } from "zustand";
 
 type SyncState = {
   lastSyncAt: string | null;
+  isLoaded: boolean;
   loadLastSync: () => Promise<void>;
   setLastSync: (date: string) => Promise<void>;
   resetLastSync: () => Promise<void>;
@@ -10,6 +11,7 @@ type SyncState = {
 
 export const useSyncStore = create<SyncState>((set) => ({
   lastSyncAt: null,
+  isLoaded: false,
 
   resetLastSync: async () => {
     await AsyncStorage.removeItem("lastSyncAt");
@@ -18,9 +20,10 @@ export const useSyncStore = create<SyncState>((set) => ({
   loadLastSync: async () => {
     const stored = await AsyncStorage.getItem("lastSyncAt");
 
-    if (stored) {
-      set({ lastSyncAt: stored });
-    }
+    set({
+      lastSyncAt: stored,
+      isLoaded: true,
+    });
   },
 
   setLastSync: async (date: string) => {
