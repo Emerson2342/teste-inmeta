@@ -113,6 +113,8 @@ export const syncPendingOrders = async () => {
           order.serverId = res.data?.id;
           order.pendingSync = false;
           order.createdAt = res.data?.createdAt ?? order.createdAt;
+          order.updatedAt =
+            res.data?.updatedAt ?? res.data?.createdAt ?? order.updatedAt;
         });
       }
     } else {
@@ -132,4 +134,5 @@ export const syncPendingOrders = async () => {
       }
     }
   }
+  useWorkOrderStore.getState().loadFromRealm();
 };
