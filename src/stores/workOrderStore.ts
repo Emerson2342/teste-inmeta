@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createWorkOrder,
   deleteWorkOrder,
+  getWorkOrders,
   updateWorkOrderAPI,
 } from "@src/api/workOrdersApi";
 import {
@@ -11,7 +12,6 @@ import {
   WorkOrder,
   WorkOrderResponse,
 } from "@src/props/types";
-import { BASE_URL } from "@src/utils/const";
 import uuid from "react-native-uuid";
 import { UpdateMode } from "realm";
 import { create } from "zustand";
@@ -45,40 +45,42 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
   isSyncing: false,
   setIsSyncing: (value) => set({ isSyncing: value }),
   setWorkOrders: (orders: WorkOrder[]) => set({ workOrders: orders }),
+
   initialSync: async () => {
     const lastSyncAt = await AsyncStorage.getItem("lastSyncAt");
-
     if (!lastSyncAt) {
-      const response = await fetch(`${BASE_URL}/work-orders`);
+      const response = await getWorkOrders();
 
-      if (response.ok) {
-        const data = await response.json();
-        realm.write(() => {
-          data.forEach((order: any) => {
-            const mappedOrder: WorkOrder = {
-              localId: order.id,
-              serverId: order.id,
-              title: order.title,
-              description: order.description,
-              assignedTo: order.assignedTo,
-              status: order.status,
-              createdAt: order.createdAt,
-              updatedAt: order.updatedAt,
-              completed: order.completed,
-              deleted: order.deleted,
-              deletedAt: undefined,
-              pendingSync: false,
-              localDeleted: false,
-            };
-
-            realm.create("WorkOrder", mappedOrder);
-          });
-        });
-        const orders = realm.objects<WorkOrder>("WorkOrder");
-        set({ workOrders: [...orders] });
-
-        await AsyncStorage.setItem("lastSyncAt", new Date().toISOString());
+      if (!response.success) {
+        console.log(response.message);
+        return;
       }
+      const ordersResponse = response.data;
+      realm.write(() => {
+        ordersResponse.forEach((order: any) => {
+          const mappedOrder: WorkOrder = {
+            localId: order.id,
+            serverId: order.id,
+            title: order.title,
+            description: order.description,
+            assignedTo: order.assignedTo,
+            status: order.status,
+            createdAt: order.createdAt,
+            updatedAt: order.updatedAt,
+            completed: order.completed,
+            deleted: order.deleted,
+            deletedAt: undefined,
+            pendingSync: false,
+            localDeleted: false,
+          };
+
+          realm.create("WorkOrder", mappedOrder);
+        });
+      });
+      const orders = realm.objects<WorkOrder>("WorkOrder");
+      set({ workOrders: [...orders] });
+
+      await AsyncStorage.setItem("lastSyncAt", new Date().toISOString());
     }
   },
 
@@ -114,7 +116,7 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
 
     try {
       const createOrder = await createWorkOrder(newOrder);
-      if (!createOrder.data) return;
+      if (!createOrder.success) return;
       const res = createOrder.data as WorkOrderResponse;
       get().updateWorkOrder({
         localId: newId,
@@ -248,7 +250,7 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
       };
 
       const apiResponse = await updateWorkOrderAPI(payload, fullOrder.serverId);
-
+      if (!apiResponse.success) return;
       realm.write(() => {
         if (apiResponse.data?.updatedAt)
           fullOrder.updatedAt = apiResponse.data.updatedAt;

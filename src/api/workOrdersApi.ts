@@ -1,44 +1,68 @@
 import {
   ApiResponse,
+  ApiResponseError,
+  SynIncrementalResponse,
   UpdateOrderApi,
   WorkOrder,
   WorkOrderResponse,
 } from "@src/props/types";
 import { BASE_URL } from "@src/utils/const";
 
-export const getWorkOrders = async () => {
-  const response = await fetch(`${BASE_URL}/work-orders`);
-  return response.json();
+const serverError: ApiResponseError = {
+  success: false,
+  message: "Erro de conexão com o servidor!",
+  status: 500,
 };
 
-export const getWorkOrder = async (id: string) => {
-  const response = await fetch(`${BASE_URL}/work-orders/${id}`);
-  return response.json();
+export const getWorkOrders = async (): Promise<ApiResponse<WorkOrder[]>> => {
+  try {
+    const response = await fetch(`${BASE_URL}/work-orders`);
+    const json = await response.json();
+    if (!response.ok) {
+      return {
+        success: false,
+        message: json?.error || "Erro ao buscar as ordens de serviço",
+        status: response.status,
+      };
+    }
+    return {
+      success: response.ok,
+      data: json,
+      status: response.status,
+    };
+  } catch (e) {
+    return serverError;
+  }
 };
 
 export const createWorkOrder = async (
   data: WorkOrder,
 ): Promise<ApiResponse<WorkOrderResponse>> => {
-  const response = await fetch(`${BASE_URL}/work-orders`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    throw new Error("Erro ao criar WorkOrder");
-  }
-  const responseData = response.ok
-    ? await response.json()
-    : "Erro ao criar a ordem";
+  try {
+    const response = await fetch(`${BASE_URL}/work-orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-  return {
-    data: responseData,
-    message: response.ok ? "Ordem criada com sucesso" : "Erro ao criar a ordem",
-    status: response.status,
-    success: response.ok,
-  };
+    const json = await response.json();
+    if (!response.ok) {
+      return {
+        success: false,
+        message: json?.error || "Erro ao criar WorkOrder",
+        status: response.status,
+      };
+    }
+    return {
+      data: json,
+      status: response.status,
+      success: response.ok,
+    };
+  } catch (e) {
+    return serverError;
+  }
 };
 
 export const updateWorkOrderAPI = async (
@@ -47,7 +71,6 @@ export const updateWorkOrderAPI = async (
 ): Promise<ApiResponse<WorkOrderResponse>> => {
   if (!id) {
     return {
-      data: undefined,
       message: "ID da ordem é obrigatório",
       status: 400,
       success: false,
@@ -63,22 +86,21 @@ export const updateWorkOrderAPI = async (
       body: JSON.stringify(data),
     });
 
-    const responseData = response.ok ? await response.json() : undefined;
+    const json = await response.json();
+    if (!response.ok) {
+      return {
+        success: false,
+        message: json?.error || "Erro ao criar WorkOrder",
+        status: response.status,
+      };
+    }
     return {
-      data: responseData,
-      message: response.ok
-        ? "Ordem atualizada com sucesso"
-        : "Erro ao atualizar a ordem",
+      data: json,
       status: response.status,
       success: response.ok,
     };
   } catch (error) {
-    return {
-      data: undefined,
-      message: "Erro de conexão com a API",
-      status: 0,
-      success: false,
-    };
+    return serverError;
   }
 };
 
@@ -87,21 +109,52 @@ export const deleteWorkOrder = async (
 ): Promise<ApiResponse<string>> => {
   if (!id)
     return {
-      data: "Id inválido",
       message: "ID da ordem é obrigatório",
       status: 40,
       success: false,
     };
-  const response = await fetch(`${BASE_URL}/work-orders/${id}`, {
-    method: "DELETE",
-  });
+  try {
+    const response = await fetch(`${BASE_URL}/work-orders/${id}`, {
+      method: "DELETE",
+    });
+    const json = await response.json();
+    if (!response.ok) {
+      return {
+        success: false,
+        message: json?.error || "Erro ao criar WorkOrder",
+        status: response.status,
+      };
+    }
+    return {
+      data: "Ordem apagada com sucesso!",
+      status: response.status,
+      success: response.ok,
+    };
+  } catch (e) {
+    return serverError;
+  }
+};
 
-  return {
-    data: "Ordem apagada com sucesso!",
-    message: response.ok
-      ? "Ordem apagada com sucesso!"
-      : "Erro ao apagar a ordem!",
-    status: response.status,
-    success: response.ok,
-  };
+export const fetchWorkOrdersSync = async (
+  since: string,
+): Promise<ApiResponse<SynIncrementalResponse>> => {
+  try {
+    const response = await fetch(`${BASE_URL}/work-orders/sync?since=${since}`);
+    const json = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: json?.error || "Erro ao buscar dados da API",
+        status: response.status,
+      };
+    }
+    return {
+      success: true,
+      status: response.status,
+      data: json,
+    };
+  } catch (e) {
+    return serverError;
+  }
 };

@@ -1,4 +1,5 @@
 import { AntDesign, Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ButtonComponent } from "@src/components/ButtonComponent";
 import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalAddOrder } from "@src/components/modals/ModalAddOrder";
@@ -46,6 +47,11 @@ export function HomeScreen() {
       runSync();
     }, []),
   );
+
+  const showStored = async () => {
+    const stored = await AsyncStorage.getItem("lastSyncAt");
+    console.log(stored);
+  };
 
   const companyServiceAnimation = () => {
     animations.forEach((anim) => anim.setValue(0));
@@ -98,6 +104,12 @@ export function HomeScreen() {
           icon={<Feather color={"#fff"} name="plus" size={20} />}
           label="Adicionar Ordem"
           onclick={() => setAddOrderModalVisible(true)}
+          isLoading={false}
+        />
+        <ButtonComponent
+          icon={<Feather color={"#fff"} name="plus" size={20} />}
+          label="Mostrar last sync at"
+          onclick={showStored}
           isLoading={false}
         />
       </View>

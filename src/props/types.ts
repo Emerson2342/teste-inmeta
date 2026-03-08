@@ -65,12 +65,22 @@ export interface UpdateOrderApi {
   assignedTo: string;
 }
 
-export interface ApiResponse<T> {
+export interface ApiResponseBase {
   success: boolean;
-  data?: T;
-  message: string;
   status: number;
 }
+
+export interface ApiResponseSuccess<T> extends ApiResponseBase {
+  success: true;
+  data: T;
+}
+
+export interface ApiResponseError extends ApiResponseBase {
+  message: string;
+  success: false;
+}
+
+export type ApiResponse<T> = ApiResponseSuccess<T> | ApiResponseError;
 
 export interface SynIncrementalResponse {
   created: WorkOrderResponse[];
