@@ -15,6 +15,11 @@ Os dados são armazenados localmente utilizando **Realm** e sincronizados com a 
 
 ---
 
+## Screenshots
+
+<img src="./assets/screenshots/home.jpeg" width="200" height="auto"><img src="./assets/screenshots/addItem.jpeg" width="200" height="auto"> <img src="./assets/screenshots/itemDetails.jpeg" width="200" height="auto"> <img src="./assets/screenshots/updateItem.jpeg" width="200" height="auto">
+<img src="./assets/screenshots/deleteItem.jpeg" width="200" height="auto">
+
 ## Pré-requisitos
 
 Antes de executar o projeto, você precisa ter instalado:
