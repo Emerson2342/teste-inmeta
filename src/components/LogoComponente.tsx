@@ -8,7 +8,6 @@ export function LogoComponent() {
     <View
       style={{
         alignItems: "center",
-        flex: 0.1,
         justifyContent: "center",
       }}
     >

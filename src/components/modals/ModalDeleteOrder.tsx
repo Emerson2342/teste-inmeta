@@ -17,7 +17,7 @@ export function ModalDeleteOrder({ id, title, onClose }: Props) {
   const handDelete = () => {
     try {
       deleteWorkOrder(id);
-      router.replace("/home-page");
+      router.back();
     } catch (e) {
       console.error(`Não foi possível apagar a Ordem de Serviço ${title}`);
     }

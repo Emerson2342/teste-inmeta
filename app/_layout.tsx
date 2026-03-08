@@ -28,7 +28,20 @@ export default function RootLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="home-page" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="home-page"
+        options={{
+          headerTitleAlign: "center",
+          title: "Ordem de Serviço",
+          headerTitleStyle: {
+            fontFamily: "QuickSand-Semibold",
+          },
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: Palette.Theme1.standard,
+          },
+        }}
+      />
       <Stack.Screen
         name="order-details"
         options={{
@@ -39,7 +52,7 @@ export default function RootLayout() {
           },
           headerTintColor: "#fff",
           headerStyle: {
-            backgroundColor: Palette.Theme2.standard,
+            backgroundColor: Palette.Theme1.standard,
           },
         }}
       />

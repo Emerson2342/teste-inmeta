@@ -1,50 +1,87 @@
-# Welcome to your Expo app 👋
+# Work Orders App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicação mobile desenvolvida em **React Native** com foco em funcionamento **offline-first**, permitindo criação e edição de ordens de serviço mesmo sem conexão com a internet.
 
-## Get started
+Os dados são armazenados localmente utilizando **Realm** e sincronizados com a API quando a conexão é restabelecida.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Tecnologias utilizadas
 
-2. Start the app
+- React Native
+- TypeScript
+- Realm (banco local)
+- Zustand (gerenciamento de estado)
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Screenshots
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+<img src="./assets/screenshots/home.jpeg" width="200" height="auto"><img src="./assets/screenshots/addItem.jpeg" width="200" height="auto"> <img src="./assets/screenshots/itemDetails.jpeg" width="200" height="auto"> <img src="./assets/screenshots/updateItem.jpeg" width="200" height="auto">
+<img src="./assets/screenshots/deleteItem.jpeg" width="200" height="auto">
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Pré-requisitos
 
-## Get a fresh project
+Antes de executar o projeto, você precisa ter instalado:
 
-When you're ready, run:
+- Node.js (>= 18)
+- npm ou yarn
+- Android Studio (para rodar no Android)
+- JDK 17
+- React Native CLI
+
+---
+
+# Instalação
+
+Clone o repositório:
 
 ```bash
-npm run reset-project
+git clone https://github.com/Emerson2342/teste-inmeta
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Acesse a pasta:
 
-## Learn more
+```bash
+cd teste-inmeta
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Instale as dependências:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm install
+```
 
-## Join the community
+## Executando o projeto
 
-Join our community of developers creating universal apps.
+Opção 1 - Rode diretamente na pasta raiz
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx expo run:android
+```
+
+Opção 2 - Caso deseje gerar o APK manualmente, primeiro gere os arquivos nativos:
+
+```bash
+npx expo prebuild
+```
+
+Dentro da pasta 'android' execute
+
+Linux / Mac:
+
+```bash
+./gradlew assembleDebug
+```
+
+Windows:
+
+```bash
+gradlew.bat assembleDebug
+```
+
+o apk de build estará em
+
+```bash
+"android/app/build/outputs/apk/debug"
+```

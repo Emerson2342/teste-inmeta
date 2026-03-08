@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgUri } from "react-native-svg";
 
 export default function Index() {
-  const [counter, setCouter] = useState(1);
+  const [counter, setCouter] = useState(5);
 
   const router = useRouter();
 

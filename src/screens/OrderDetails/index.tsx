@@ -4,11 +4,11 @@ import { ButtonComponent } from "@src/components/ButtonComponent";
 import { LogoComponent } from "@src/components/LogoComponente";
 import { ModalBaseComponent } from "@src/components/modals/ModalBaseComponent";
 import { ModalDeleteOrder } from "@src/components/modals/ModalDeleteOrder";
-import { ModalUpdateOrder } from "@src/components/modals/ModalUpdateOrder";
+import { ModalOrder } from "@src/components/modals/ModalOrder";
 import { TextComponent } from "@src/components/TextComponent";
 import { useWorkOrderStore } from "@src/stores/workOrderStore";
 import { Palette } from "@src/theme/colors";
-import { WorkOrderStatus } from "@src/utils/Enums";
+import { ModalWorderType, WorkOrderStatus } from "@src/utils/Enums";
 import { getStatusLabel } from "@src/utils/WorkerStatus";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -38,52 +38,66 @@ export function OrderDetails({ id }: Props) {
   const updatedAt = order?.updatedAt ? new Date(order.updatedAt) : new Date();
 
   return (
-    <View style={{ flex: 1, marginTop: 35 }}>
+    <View style={{ flex: 1, gap: 30, marginVertical: 30 }}>
       <LogoComponent />
       {order ? (
-        <View>
-          <View style={styles.container}>
-            <TextComponent
-              weight="bold"
-              style={{ textAlign: "center", fontSize: 20, marginVertical: 15 }}
-            >
-              {order.title}
-            </TextComponent>
-            <View style={{ gap: 15 }}>
-              <View>
-                <TextComponent>Responsável Técnico: </TextComponent>
-                <TextComponent weight="bold">{order.assignedTo}</TextComponent>
-              </View>
-              <View>
-                <TextComponent>Descrição: </TextComponent>
-                <TextComponent weight="bold">{order.description}</TextComponent>
-              </View>
-              <View>
-                <TextComponent>Criado em: </TextComponent>
-                <TextComponent weight="bold">
-                  {createdAt.toLocaleDateString("pt-BR")} às{" "}
-                  {createdAt.toLocaleTimeString("pt-BR")}
-                </TextComponent>
-              </View>
-              <View>
-                <TextComponent>Atualizado em: </TextComponent>
-                <TextComponent weight="bold">
-                  {updatedAt.toLocaleDateString("pt-BR")} às{" "}
-                  {updatedAt.toLocaleTimeString("pt-BR")}
-                </TextComponent>
-              </View>
-              <View>
-                <TextComponent>Status: </TextComponent>
-                <TextComponent weight="bold">
-                  {getStatusLabel(order.status as WorkOrderStatus)}
-                </TextComponent>
+        <View style={{ gap: 15, flex: 1 }}>
+          <View
+            style={{
+              flex: 1,
+            }}
+          >
+            <View style={styles.container}>
+              <TextComponent
+                weight="bold"
+                style={{
+                  textAlign: "center",
+                  fontSize: 20,
+                  marginVertical: 15,
+                }}
+              >
+                {order.title}
+              </TextComponent>
+              <View style={{ gap: 15 }}>
+                <View>
+                  <TextComponent>Responsável Técnico: </TextComponent>
+                  <TextComponent weight="bold">
+                    {order.assignedTo}
+                  </TextComponent>
+                </View>
+                <View>
+                  <TextComponent>Descrição: </TextComponent>
+                  <TextComponent weight="bold">
+                    {order.description}
+                  </TextComponent>
+                </View>
+                <View>
+                  <TextComponent>Criado em: </TextComponent>
+                  <TextComponent weight="bold">
+                    {createdAt.toLocaleDateString("pt-BR")} às{" "}
+                    {createdAt.toLocaleTimeString("pt-BR")}
+                  </TextComponent>
+                </View>
+                <View>
+                  <TextComponent>Atualizado em: </TextComponent>
+                  <TextComponent weight="bold">
+                    {updatedAt.toLocaleDateString("pt-BR")} às{" "}
+                    {updatedAt.toLocaleTimeString("pt-BR")}
+                  </TextComponent>
+                </View>
+                <View>
+                  <TextComponent>Status: </TextComponent>
+                  <TextComponent weight="bold">
+                    {getStatusLabel(order.status as WorkOrderStatus)}
+                  </TextComponent>
+                </View>
               </View>
             </View>
           </View>
           <View
             style={{
+              flex: 0.3,
               alignItems: "center",
-              marginTop: 30,
               flexDirection: "row",
               justifyContent: "space-around",
             }}
@@ -93,7 +107,7 @@ export function OrderDetails({ id }: Props) {
               icon={
                 <Feather
                   name="edit"
-                  color={Palette.Theme2.standard}
+                  color={Palette.Theme1.standard}
                   size={17}
                 />
               }
@@ -120,7 +134,8 @@ export function OrderDetails({ id }: Props) {
           <ModalBaseComponent
             visible={modalUpdateVisible}
             child={
-              <ModalUpdateOrder
+              <ModalOrder
+                type={ModalWorderType.UPDATE}
                 order={order}
                 onClose={() => setModalUpdateVisible(false)}
               />
@@ -137,7 +152,6 @@ export function OrderDetails({ id }: Props) {
 const styles = StyleSheet.create({
   container: {
     width: "95%",
-    marginTop: 50,
     backgroundColor: "#fff",
     borderRadius: 7,
     alignSelf: "center",
