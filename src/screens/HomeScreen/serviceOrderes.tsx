@@ -63,9 +63,6 @@ export function ServiceOrderesComponent() {
   );
   return (
     <View style={styles.container}>
-      <TextComponent weight="bold" style={styles.title}>
-        Ordens de Serviço
-      </TextComponent>
       {loadingData ? (
         <ActivityIndicatorComponent />
       ) : filteredOrders.length > 0 ? (
@@ -102,7 +99,9 @@ export function ServiceOrderesComponent() {
             justifyContent: "center",
           }}
         >
-          <TextComponent weight="bold">Nenhuma ordem criada!</TextComponent>
+          <TextComponent weight="bold" style={{ color: "gray" }}>
+            Nenhuma ordem criada!
+          </TextComponent>
         </View>
       )}
     </View>

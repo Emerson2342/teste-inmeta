@@ -32,7 +32,7 @@ export default function RootLayout() {
         name="home-page"
         options={{
           headerTitleAlign: "center",
-          title: "",
+          title: "Ordem de Serviço",
           headerTitleStyle: {
             fontFamily: "QuickSand-Semibold",
           },

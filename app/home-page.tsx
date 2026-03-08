@@ -7,7 +7,6 @@ export default function HomePage() {
   useNetworkSync();
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
-      {/* <HeaderComponent /> */}
       <HomeScreen />
       <FooterComponent />
     </SafeAreaView>
