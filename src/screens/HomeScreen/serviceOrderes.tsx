@@ -123,9 +123,11 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   itemRow: {
+    borderLeftWidth: 5,
+    borderLeftColor: Palette.Theme2.standard,
     flexDirection: "row",
     backgroundColor: "#fff",
-    borderRadius: 7,
+    borderRadius: 5,
     marginVertical: 3,
     padding: 5,
   },

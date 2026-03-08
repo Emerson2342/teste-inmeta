@@ -28,7 +28,20 @@ export default function RootLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="home-page" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="home-page"
+        options={{
+          headerTitleAlign: "center",
+          title: "",
+          headerTitleStyle: {
+            fontFamily: "QuickSand-Semibold",
+          },
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: Palette.Theme1.standard,
+          },
+        }}
+      />
       <Stack.Screen
         name="order-details"
         options={{

@@ -3,3 +3,8 @@ export enum WorkOrderStatus {
   INPROGRESS = "In Progress",
   COMPLETED = "Completed",
 }
+
+export enum ModalWorderType {
+  CREATE = "Create",
+  UPDATE = "Update",
+}
