@@ -40,25 +40,37 @@ export const syncWorkOrdersService = async (): Promise<
   const data = res.data;
 
   for (const c of data.created) {
-    const exists = realm
+    const local = realm
       .objects<WorkOrder>("WorkOrder")
       .filtered("serverId == $0", c.id)[0];
-    if (!exists) {
-      addWorkOrderFromAPI({
-        localId: c.id,
-        serverId: c.id,
-        title: c.title,
-        description: c.description,
-        assignedTo: c.assignedTo,
-        status: c.status,
-        createdAt: c.createdAt,
-        updatedAt: c.updatedAt,
-        completed: c.completed,
-        deleted: c.deleted,
-        pendingSync: false,
-        localDeleted: false,
+    if (local) continue;
+
+    const pendingLocal = realm
+      .objects<WorkOrder>("WorkOrder")
+      .filtered("pendingSync == true AND title == $0", c.title)[0];
+
+    if (pendingLocal) {
+      realm.write(() => {
+        pendingLocal.serverId = c.id;
+        pendingLocal.pendingSync = false;
       });
+      continue;
     }
+
+    addWorkOrderFromAPI({
+      localId: c.id,
+      serverId: c.id,
+      title: c.title,
+      description: c.description,
+      assignedTo: c.assignedTo,
+      status: c.status,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+      completed: c.completed,
+      deleted: c.deleted,
+      pendingSync: false,
+      localDeleted: false,
+    });
   }
 
   for (const ord of data.updated) {
