@@ -1,17 +1,13 @@
 # Work Orders App
 
-Aplicação mobile desenvolvida em **React Native** com foco em funcionamento **offline-first**, permitindo criação e edição de ordens de serviço mesmo sem conexão com a internet.
+Este projeto foi desenvolvido como **teste técnico para a IN META Tecnologia**, com foco em mobile offline-first utilizando React Native.
 
-Os dados são armazenados localmente utilizando **Realm** e sincronizados com a API quando a conexão é restabelecida.
+O objetivo foi demonstrar habilidades em:
 
----
-
-## Tecnologias utilizadas
-
-- React Native
-- TypeScript
-- Realm (banco local)
-- Zustand (gerenciamento de estado)
+- Desenvolvimento mobile com **React Native**
+- Gerenciamento de estado com **Zustand**
+- Banco local **Realm**
+- Boas práticas de layout e UX
 
 ---
 
@@ -32,7 +28,7 @@ Antes de executar o projeto, você precisa ter instalado:
 
 ---
 
-# Instalação
+## Instalação
 
 Clone o repositório:
 
