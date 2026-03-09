@@ -87,10 +87,6 @@ export const syncWorkOrdersService = async (): Promise<
       realm.write(() => {
         local.pendingSync = false;
       });
-    } else if (localTime > serverTime && local.pendingSync) {
-      if (local.pendingSync) {
-        updateWorkOrderOnServer({ localId: local.localId });
-      }
     }
   }
 
@@ -104,6 +100,7 @@ export const syncWorkOrdersService = async (): Promise<
   }
 
   await setLastSync(new Date().toISOString());
+  useWorkOrderStore.getState().loadFromRealm();
 
   return {
     status: res.status,
