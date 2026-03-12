@@ -20,7 +20,9 @@ export function ServiceOrderesComponent() {
   }, []);
 
   const filteredOrders = useMemo(() => {
-    return workOrders.filter((o) => o.localDeleted === false);
+    return workOrders
+      .filter((o) => o.localDeleted === false)
+      .sort((a, b) => a.title.localeCompare(b.title));
   }, [workOrders]);
 
   const renderItemMemo = useCallback(
