@@ -24,9 +24,6 @@ type WorkOrderState = {
   addWorkOrder: (data: AddWorkOrderData) => void;
   addWorkOrderFromAPI: (data: WorkOrder) => void;
   deleteWorkOrderFromAPI: (id: string) => void;
-  updateWorkOrderOnServer: (
-    data: Partial<WorkOrder> & { localId: string },
-  ) => void;
   updateWorkerOrderFromAPi: (
     updatedOrder: Partial<WorkOrder> & { localId: string },
   ) => void;
@@ -230,38 +227,6 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
         );
         if (order) order.pendingSync = true;
       });
-    }
-  },
-  updateWorkOrderOnServer: async (
-    updatedOrder: Partial<WorkOrder> & { localId: string },
-  ) => {
-    try {
-      const fullOrder = realm.objectForPrimaryKey<WorkOrder>(
-        "WorkOrder",
-        updatedOrder.localId,
-      );
-      if (!fullOrder) throw new Error("Ordem não encontrada no Realm");
-
-      const payload: UpdateOrderApi = {
-        title: fullOrder.title,
-        description: fullOrder.description,
-        status: fullOrder.status,
-        assignedTo: fullOrder.assignedTo,
-      };
-
-      const apiResponse = await updateWorkOrderAPI(payload, fullOrder.serverId);
-      if (!apiResponse.success) return;
-      realm.write(() => {
-        if (apiResponse.data?.updatedAt)
-          fullOrder.updatedAt = apiResponse.data.updatedAt;
-
-        if (apiResponse.data?.createdAt)
-          fullOrder.createdAt = apiResponse.data.createdAt;
-
-        fullOrder.pendingSync = !apiResponse.success;
-      });
-    } catch (e: any) {
-      console.log("Erro ao atualizar o servidor", e.message);
     }
   },
   updateWorkerOrderFromAPi: async (

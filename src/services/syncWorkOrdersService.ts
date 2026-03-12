@@ -21,7 +21,6 @@ export const syncWorkOrdersService = async (): Promise<
     addWorkOrderFromAPI,
     deleteWorkOrderFromAPI,
     updateWorkerOrderFromAPi,
-    updateWorkOrderOnServer,
   } = useWorkOrderStore.getState();
 
   if (!lastSyncAt) {
@@ -43,7 +42,19 @@ export const syncWorkOrdersService = async (): Promise<
     const local = realm
       .objects<WorkOrder>("WorkOrder")
       .filtered("serverId == $0", c.id)[0];
+
     if (local) continue;
+
+    const possibleDuplicate = realm
+      .objects<WorkOrder>("WorkOrder")
+      .filtered("title == $0 AND pendingSync == false", c.title)[0];
+
+    if (possibleDuplicate) {
+      realm.write(() => {
+        possibleDuplicate.serverId = c.id;
+      });
+      continue;
+    }
 
     const pendingLocal = realm
       .objects<WorkOrder>("WorkOrder")
@@ -87,10 +98,6 @@ export const syncWorkOrdersService = async (): Promise<
       realm.write(() => {
         local.pendingSync = false;
       });
-    } else if (localTime > serverTime && local.pendingSync) {
-      if (local.pendingSync) {
-        updateWorkOrderOnServer({ localId: local.localId });
-      }
     }
   }
 
@@ -104,6 +111,7 @@ export const syncWorkOrdersService = async (): Promise<
   }
 
   await setLastSync(new Date().toISOString());
+  useWorkOrderStore.getState().loadFromRealm();
 
   return {
     status: res.status,

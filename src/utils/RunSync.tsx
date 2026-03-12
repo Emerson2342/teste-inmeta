@@ -18,8 +18,8 @@ export const runSync = async () => {
       await loadLastSync();
     }
 
-    await syncPendingOrders();
     await syncWorkOrdersService();
+    await syncPendingOrders();
   } catch (e) {
     console.log("Erro no sync", e);
   } finally {
